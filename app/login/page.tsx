@@ -45,8 +45,8 @@ export default function LoginPage() {
             <div className="w-16 h-16 rounded-xl bg-card border border-border flex items-center justify-center">
               <MapPin className="w-8 h-8 text-primary" strokeWidth={1.5} />
             </div>
-            <h1 className="text-2xl font-medium text-foreground">Connexion Interne</h1>
-            <p className="text-sm text-muted-foreground">Accès réservé à Go To Agency</p>
+            <h1 className="text-2xl font-medium text-foreground">Connexion</h1>
+            <p className="text-sm text-muted-foreground">Accès sécurisé - Go To Agency</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
