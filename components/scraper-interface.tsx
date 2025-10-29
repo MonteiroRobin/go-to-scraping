@@ -1,14 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import { MapComponent } from "@/components/map-component"
-import { ResultsList } from "@/components/results-list"
+import dynamic from "next/dynamic"
 import { SearchBar, type SearchFilters } from "@/components/search-bar"
-import { Download, Loader2, LogOut, MapPin, History } from "lucide-react"
+import { Download, Loader2, LogOut, MapPin, History, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
 import { Progress } from "@/components/ui/progress"
+import { showSuccessToast, showErrorToast, showWarningToast, showInfoToast } from "@/lib/toast-utils"
+import { getCachedSearch, setCachedSearch, getCacheAge } from "@/lib/search-cache"
+import { canSearch } from "@/lib/throttle"
+
+const MapComponent = dynamic(() => import("@/components/map-component").then(mod => ({ default: mod.MapComponent })), {
+  loading: () => <div className="w-full h-full bg-muted flex items-center justify-center">Chargement de la carte...</div>,
+  ssr: false
+})
+
+const ResultsList = dynamic(() => import("@/components/results-list").then(mod => ({ default: mod.ResultsList })), {
+  loading: () => <div className="p-4 text-muted-foreground">Chargement des résultats...</div>,
+  ssr: false
+})
 
 export interface Business {
   id: string
@@ -29,7 +41,9 @@ const OVERPASS_ENDPOINTS = [
 export function ScraperInterface() {
   const { user, logout } = useAuth()
   const [results, setResults] = useState<Business[]>([])
+  const [totalFound, setTotalFound] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [selectedZone, setSelectedZone] = useState<{
     north: number
@@ -301,6 +315,33 @@ export function ScraperInterface() {
     location?: { lat: number; lon: number },
   ) => {
     console.log("[v0] handleSearch called with:", { city, businessType, filters, location })
+
+    // Prevent double-click
+    if (isSearching) {
+      showWarningToast("Recherche en cours", "Veuillez patienter...")
+      return
+    }
+
+    // Rate limiting
+    const { allowed, remaining } = canSearch()
+    if (!allowed) {
+      showWarningToast("Trop rapide!", `Veuillez attendre ${remaining}s avant de relancer une recherche`)
+      return
+    }
+
+    // Check cache
+    const cacheKey = `${city}-${businessType}-${JSON.stringify(filters)}`
+    const cached = getCachedSearch(cacheKey)
+    if (cached) {
+      const age = getCacheAge(cacheKey)
+      const minutes = Math.floor((age || 0) / 60000)
+      showInfoToast("Résultats du cache", `Recherche effectuée il y a ${minutes} minute(s)`)
+      setResults(cached)
+      setTotalFound(cached.length)
+      return
+    }
+
+    setIsSearching(true)
     setIsLoading(true)
     setResults([])
     setProgress({ current: 0, total: 0 })
@@ -314,8 +355,9 @@ export function ScraperInterface() {
 
       if (!cityLocation) {
         console.error("[v0] City not found:", city)
-        alert("Ville non trouvée. Veuillez vérifier l'orthographe.")
+        showErrorToast("Ville non trouvée", "Veuillez vérifier l'orthographe ou sélectionner une ville dans l'autocomplétion")
         setIsLoading(false)
+        setIsSearching(false)
         return
       }
 
@@ -339,7 +381,16 @@ export function ScraperInterface() {
 
       console.log("[v0] Search complete, found", businesses.length, "businesses")
       setResults(businesses)
+      setTotalFound(businesses.length)
       setSelectedZone(zone)
+
+      // Save to cache
+      setCachedSearch(cacheKey, businesses)
+
+      // Show limit warning if needed
+      if (businesses.length === 10) {
+        showWarningToast("Limite atteinte", "10 résultats affichés. Version bêta limitée pour préserver les quotas API")
+      }
 
       // Save search history
       const saved = localStorage.getItem("searchHistory")
@@ -355,10 +406,11 @@ export function ScraperInterface() {
       localStorage.setItem("searchHistory", JSON.stringify(history))
     } catch (error: any) {
       console.error("[v0] Error searching businesses:", error)
-      alert("❌ Erreur lors de la recherche. Veuillez réessayer.")
+      showErrorToast("Erreur lors de la recherche", error.message || "Veuillez réessayer dans quelques instants")
       setResults([])
     } finally {
       setIsLoading(false)
+      setIsSearching(false)
       setProgress({ current: 0, total: 0 })
     }
   }
@@ -369,13 +421,11 @@ export function ScraperInterface() {
     const validationError = validateZone(zone)
     if (validationError) {
       if (validationError.includes("trop petite")) {
-        alert(validationError)
+        showWarningToast("Zone trop petite", "Veuillez dessiner une zone plus grande (minimum 100m x 100m)")
         return
       }
-      // For warnings, ask for confirmation
-      if (!confirm(validationError)) {
-        return
-      }
+      // For warnings, show toast and continue
+      showWarningToast("Zone importante", validationError.split('\n')[0])
     }
 
     setSelectedZone(zone)
@@ -394,16 +444,15 @@ export function ScraperInterface() {
       setResults(businesses)
 
       if (businesses.length === 0) {
-        alert(
-          "ℹ️ Aucun commerce trouvé dans cette zone.\n\nEssayez:\n- Une zone plus grande\n- Une autre zone\n- Un type de commerce spécifique",
-        )
+        showInfoToast("Aucun commerce trouvé", "Essayez une zone plus grande ou une autre zone")
       }
     } catch (error: any) {
       console.error("[v0] Error fetching businesses:", error)
-      alert(error.message || "❌ Erreur lors de la récupération des données. Veuillez réessayer.")
+      showErrorToast("Erreur de récupération", error.message || "Veuillez réessayer dans quelques instants")
       setResults([])
     } finally {
       setIsLoading(false)
+      setIsSearching(false)
       setProgress({ current: 0, total: 0 })
     }
   }
@@ -456,12 +505,10 @@ export function ScraperInterface() {
 
       await navigator.clipboard.writeText(sheetsData)
 
-      alert(
-        "✅ Données copiées dans le presse-papier!\n\nVous pouvez maintenant:\n1. Ouvrir Google Sheets\n2. Créer une nouvelle feuille\n3. Coller les données (Ctrl+V ou Cmd+V)\n\nLes colonnes seront automatiquement séparées.",
-      )
+      showSuccessToast("Données copiées!", "Vous pouvez maintenant coller dans Google Sheets (Ctrl+V)")
     } catch (error) {
       console.error("[v0] Error exporting to Sheets:", error)
-      alert("❌ Erreur lors de la copie des données. Veuillez réessayer.")
+      showErrorToast("Erreur de copie", "Impossible de copier les données. Veuillez réessayer.")
     }
   }
 
@@ -471,7 +518,7 @@ export function ScraperInterface() {
 
   const handleExportHistory = () => {
     if (selectedHistoryIds.length === 0) {
-      alert("Veuillez sélectionner au moins un élément de l'historique à exporter.")
+      showWarningToast("Aucune sélection", "Veuillez sélectionner au moins un élément de l'historique")
       return
     }
 
@@ -507,9 +554,10 @@ export function ScraperInterface() {
       document.body.removeChild(link)
 
       setSelectedHistoryIds([])
+      showSuccessToast("Historique exporté!", `${selectedItems.length} recherche(s) exportée(s) en CSV`)
     } catch (error) {
       console.error("[v0] Error exporting history:", error)
-      alert("❌ Erreur lors de l'export de l'historique.")
+      showErrorToast("Erreur d'export", "Impossible d'exporter l'historique")
     }
   }
 
@@ -584,9 +632,11 @@ export function ScraperInterface() {
 
           <div className="mt-6">
             <Button
+              id="history-button"
               variant="outline"
               onClick={() => setShowHistory(!showHistory)}
               className="w-full justify-between border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800"
+              aria-label="Afficher ou masquer l'historique des recherches"
             >
               <span className="flex items-center gap-2">
                 <History className="w-4 h-4 text-blue-600 dark:text-blue-400" />

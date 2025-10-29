@@ -1,0 +1,113 @@
+{
+  "nav": {
+    "team": "Équipe",
+    "login": "Connexion"
+  },
+  "hero": {
+    "badge": "Bêta privée - Accès limité",
+    "title": "Scrapez les commerces locaux en quelques clics",
+    "subtitle": "Sélectionnez une zone sur la carte, récupérez instantanément les données de tous les commerces locaux, et exportez-les en CSV ou Google Sheets.",
+    "cta": "Rejoindre la liste",
+    "loading": "...",
+    "emailPlaceholder": "votre@email.com",
+    "emailHint": "Inscrivez-vous pour être notifié lors de l'ouverture publique",
+    "successTitle": "Vous êtes sur la liste d'attente !",
+    "successMessage": "Nous vous contacterons dès que l'accès sera ouvert au public."
+  },
+  "features": {
+    "search": {
+      "title": "Recherche intelligente",
+      "description": "Tapez 'café Paris' et récupérez automatiquement tous les établissements de la ville"
+    },
+    "zone": {
+      "title": "Sélection par zone",
+      "description": "Dessinez un rectangle sur la carte pour cibler précisément une zone géographique"
+    },
+    "export": {
+      "title": "Export facile",
+      "description": "Exportez vos données en CSV ou copiez-les directement dans Google Sheets"
+    }
+  },
+  "cta": {
+    "title": "Accès anticipé disponible",
+    "description": "Rejoignez la liste d'attente pour être parmi les premiers à utiliser LocalScraper"
+  },
+  "footer": {
+    "copyright": "© 2025 LocalScraper - Go To Agency. Tous droits réservés."
+  },
+  "meta": {
+    "title": "LocalScraper - Extraire les Données des Commerces Locaux Instantanément",
+    "description": "L'outil ultime pour scraper les données des commerces locaux. Sélectionnez une zone sur la carte, récupérez les informations de contact, et exportez en CSV ou Google Sheets. Parfait pour la génération de leads, l'étude de marché et la business intelligence.",
+    "keywords": "scraper commerce, données commerces locaux, génération leads, business intelligence, étude de marché, OpenStreetMap, extraction données, contacts entreprises, export CSV"
+  },
+  "seo": {
+    "howItWorks": {
+      "title": "Comment fonctionne LocalScraper",
+      "step1": {
+        "title": "1. Recherchez ou sélectionnez une zone",
+        "description": "Utilisez notre recherche intelligente pour trouver une ville ou une zone, ou dessinez un rectangle directement sur la carte interactive pour définir votre zone cible."
+      },
+      "step2": {
+        "title": "2. Extraction automatique des données",
+        "description": "Notre moteur extrait instantanément toutes les données des commerces locaux de la zone sélectionnée, incluant noms, adresses, téléphones et sites web."
+      },
+      "step3": {
+        "title": "3. Exportez et utilisez",
+        "description": "Téléchargez vos données au format CSV ou copiez-les directement dans Google Sheets pour une utilisation immédiate dans votre CRM ou vos campagnes marketing."
+      }
+    },
+    "useCases": {
+      "title": "Cas d'utilisation",
+      "leadGeneration": {
+        "title": "Génération de leads",
+        "description": "Trouvez et contactez des commerces locaux pour de la vente B2B. Parfait pour les équipes commerciales cherchant à élargir leur base clients dans des zones géographiques spécifiques."
+      },
+      "marketResearch": {
+        "title": "Étude de marché",
+        "description": "Analysez le paysage concurrentiel et identifiez les opportunités de marché. Obtenez une vue complète des commerces dans n'importe quelle zone pour vos décisions stratégiques."
+      },
+      "deliveryServices": {
+        "title": "Livraison & Services",
+        "description": "Construisez une base de données de restaurants, magasins et services locaux pour des plateformes de livraison ou des programmes de partenariat."
+      }
+    },
+    "benefits": {
+      "title": "Pourquoi choisir LocalScraper ?",
+      "speed": {
+        "title": "Ultra rapide",
+        "description": "Obtenez des milliers d'enregistrements en quelques secondes, pas des heures"
+      },
+      "accuracy": {
+        "title": "Données précises",
+        "description": "Alimenté par la base de données fiable et à jour d'OpenStreetMap"
+      },
+      "privacy": {
+        "title": "Respect de la vie privée",
+        "description": "Aucun stockage de données personnelles, tout le traitement se fait en temps réel"
+      },
+      "easy": {
+        "title": "Facile à utiliser",
+        "description": "Interface intuitive que tout le monde peut utiliser sans connaissances techniques"
+      }
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "q1": {
+        "question": "Quelles données puis-je extraire ?",
+        "answer": "LocalScraper extrait les noms des commerces, adresses complètes, numéros de téléphone, sites web et coordonnées géographiques. Toutes les données proviennent de la base de données publique d'OpenStreetMap."
+      },
+      "q2": {
+        "question": "Est-ce légal ?",
+        "answer": "Oui, absolument. Nous extrayons uniquement des données publiquement disponibles depuis OpenStreetMap, qui est un projet collaboratif open-source. Toutes les données sont sous licence ODbL (Open Database License)."
+      },
+      "q3": {
+        "question": "Combien de commerces puis-je extraire ?",
+        "answer": "Il n'y a pas de limite stricte. Vous pouvez extraire autant de commerces qu'il en existe dans votre zone sélectionnée. Pour les très grandes zones, nous divisons automatiquement l'extraction en petits morceaux pour des performances optimales."
+      },
+      "q4": {
+        "question": "Quels formats d'export sont disponibles ?",
+        "answer": "Vous pouvez exporter les données au format CSV ou les copier directement pour les coller dans Google Sheets, Excel ou toute application de tableur."
+      }
+    }
+  }
+}
