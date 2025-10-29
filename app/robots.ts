@@ -5,8 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/', '/_next/'],
+      disallow: ['/api/', '/scraper/'],
     },
-    sitemap: 'https://localscraper.com/sitemap.xml',
+    sitemap: 'https://go-to-scraping.vercel.app/sitemap.xml',
   }
 }

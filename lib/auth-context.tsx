@@ -19,7 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children, lang }: { children: ReactNode; lang?: string }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
@@ -87,8 +87,7 @@ export function AuthProvider({ children, lang }: { children: ReactNode; lang?: s
   const logout = async () => {
     await supabase.auth.signOut()
     setUser(null)
-    const locale = lang || 'en'
-    router.push(`/${locale}`)
+    router.push('/')
   }
 
   return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>

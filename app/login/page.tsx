@@ -10,15 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
-import type { Locale } from "@/lib/i18n"
 
-interface PageProps {
-  params: {
-    lang: Locale
-  }
-}
-
-export default function LoginPage({ params }: PageProps) {
+export default function LoginPage() {
   const { login } = useAuth()
   const router = useRouter()
   const [email, setEmail] = useState("")
@@ -33,10 +26,10 @@ export default function LoginPage({ params }: PageProps) {
 
     try {
       await login(email, password)
-      router.push(`/${params.lang}/scraper`)
+      router.push('/scraper')
     } catch (err: any) {
-      console.error("Login error:", err)
-      setError(err.message || "Authentication failed")
+      console.error("Erreur de connexion:", err)
+      setError(err.message || "Échec de l'authentification")
     } finally {
       setIsLoading(false)
     }
@@ -46,7 +39,7 @@ export default function LoginPage({ params }: PageProps) {
     <div className="min-h-screen bg-background flex flex-col">
       <nav className="border-b border-border">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href={`/${params.lang}`} className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <MapPin className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
@@ -60,8 +53,8 @@ export default function LoginPage({ params }: PageProps) {
       <main className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground">Team Access</h1>
-            <p className="mt-2 text-muted-foreground">Sign in to access the scraper interface</p>
+            <h1 className="text-3xl font-bold text-foreground">Accès Équipe</h1>
+            <p className="mt-2 text-muted-foreground">Connectez-vous pour accéder au scraper</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -82,7 +75,7 @@ export default function LoginPage({ params }: PageProps) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder="votre@email.com"
                   required
                   disabled={isLoading}
                   className="pl-10 h-12"
@@ -92,7 +85,7 @@ export default function LoginPage({ params }: PageProps) {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-foreground">
-                Password
+                Mot de passe
               </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -117,17 +110,17 @@ export default function LoginPage({ params }: PageProps) {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing in...
+                  Connexion...
                 </>
               ) : (
-                "Sign In"
+                "Se connecter"
               )}
             </Button>
           </form>
 
           <div className="text-center">
-            <Link href={`/${params.lang}`} className="text-sm text-muted-foreground hover:text-foreground">
-              ← Back to home
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+              ← Retour à l'accueil
             </Link>
           </div>
         </div>
