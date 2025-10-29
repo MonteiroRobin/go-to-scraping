@@ -89,7 +89,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider lang={params.lang}>{children}</AuthProvider>
         </ThemeProvider>
         <Toaster position="top-right" richColors closeButton />
         <Analytics />
