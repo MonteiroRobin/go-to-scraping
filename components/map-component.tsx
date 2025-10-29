@@ -280,10 +280,10 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
         drawingMode: null,
         drawingControl: false,
         rectangleOptions: {
-          fillColor: theme === "dark" ? "#C4B896" : "#4A90E2",
-          fillOpacity: 0.1,
+          fillColor: "#3b82f6",
+          fillOpacity: 0.15,
           strokeWeight: 2,
-          strokeColor: theme === "dark" ? "#C4B896" : "#4A90E2",
+          strokeColor: "#3b82f6",
           clickable: false,
           editable: false,
           zIndex: 1,

@@ -299,13 +299,21 @@ export function ScraperInterface() {
       }
     }
 
+    // Apply filters FIRST
     let filteredBusinesses = allBusinesses
     if (filters.keywords) {
       const keywordLower = filters.keywords.toLowerCase()
       filteredBusinesses = filteredBusinesses.filter((b) => b.name.toLowerCase().includes(keywordLower))
     }
 
-    return filteredBusinesses.slice(0, 10) // Limit to 10 results
+    // Return both total and limited results
+    const totalBeforeLimit = filteredBusinesses.length
+    const limitedResults = filteredBusinesses.slice(0, 10)
+
+    // Store total in state for display
+    setTotalFound(totalBeforeLimit)
+
+    return limitedResults
   }
 
   const handleSearch = async (
@@ -379,17 +387,18 @@ export function ScraperInterface() {
 
       const businesses = await scrapeMultipleChunks(chunks, businessType, filters)
 
-      console.log("[v0] Search complete, found", businesses.length, "businesses")
+      console.log("[v0] Search complete, displaying", businesses.length, "of", totalFound, "businesses")
       setResults(businesses)
-      setTotalFound(businesses.length)
       setSelectedZone(zone)
 
       // Save to cache
       setCachedSearch(cacheKey, businesses)
 
       // Show limit warning if needed
-      if (businesses.length === 10) {
-        showWarningToast("Limite atteinte", "10 résultats affichés. Version bêta limitée pour préserver les quotas API")
+      if (businesses.length === 10 && totalFound > 10) {
+        showWarningToast("Limite atteinte", `${totalFound} résultats trouvés, 10 affichés. Version bêta limitée.`)
+      } else if (totalFound > 0) {
+        showSuccessToast("Recherche terminée", `${totalFound} résultat(s) trouvé(s)`)
       }
 
       // Save search history
