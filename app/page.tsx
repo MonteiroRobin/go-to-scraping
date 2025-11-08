@@ -10,6 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
+import { AnimatedText, GlitchText } from "@/components/AnimatedText"
+import { FloatingDots } from "@/components/InteractiveGrid"
+import { ScrollProgress } from "@/components/ScrollProgress"
+import { OrganizationJsonLd, SoftwareApplicationJsonLd } from "@/components/BlogJsonLd"
+import { HeroIllustration } from "@/components/HeroIllustration"
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth()
@@ -42,7 +47,12 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="border-b border-border">
+      <OrganizationJsonLd />
+      <SoftwareApplicationJsonLd />
+      <ScrollProgress />
+      <FloatingDots />
+
+      <nav className="border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -55,6 +65,11 @@ export default function HomePage() {
             <Link href="/blog">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 Blog
+              </Button>
+            </Link>
+            <Link href="/faq">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                FAQ
               </Button>
             </Link>
             <ThemeToggle />
@@ -75,8 +90,9 @@ export default function HomePage() {
               Bêta privée - Accès limité
             </div>
 
-            <h1 className="text-5xl font-bold text-foreground leading-tight text-balance">
-              Scrapez les commerces locaux en quelques clics
+            <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight text-balance">
+              <AnimatedText text="Scrapez les commerces" className="block" />
+              <AnimatedText text="locaux en quelques clics" className="block" />
             </h1>
 
             <p className="text-xl text-muted-foreground leading-relaxed text-pretty">

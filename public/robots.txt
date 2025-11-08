@@ -1,0 +1,15 @@
+# robots.txt for Go To Scraping
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/*
+
+Sitemap: https://gotoscraping.com/sitemap.xml
+
+# Block admin and API routes
+Disallow: /api/
+Disallow: /scraper/
+Disallow: /login/
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

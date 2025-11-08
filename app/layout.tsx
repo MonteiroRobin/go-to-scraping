@@ -17,9 +17,58 @@ const _lora = V0_Font_Lora({ subsets: ['latin'], weight: ["400","500","600","700
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Business Scraper",
-  description: "Minimalist local business scraping tool",
-  generator: "v0.app",
+  metadataBase: new URL('https://gotoscraping.com'),
+  title: {
+    default: "Go To Scraping - Scraping de Commerces Locaux Simplifié",
+    template: "%s | Go To Scraping"
+  },
+  description: "Scrapez les données de milliers de commerces locaux en quelques clics. Sélectionnez une zone sur la carte, récupérez instantanément les contacts et exportez en CSV ou Google Sheets. Solution de web scraping professionnelle et sans code.",
+  keywords: ["web scraping", "scraping commerces locaux", "données commerces", "Google Places API", "leads B2B", "prospection commerciale", "extraction données", "scraping France", "base de données entreprises", "leads qualifiés"],
+  authors: [{ name: "Go To Agency" }],
+  creator: "Go To Agency",
+  publisher: "Go To Scraping",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+    url: 'https://gotoscraping.com',
+    siteName: 'Go To Scraping',
+    title: 'Go To Scraping - Scraping de Commerces Locaux Simplifié',
+    description: 'Scrapez les données de milliers de commerces locaux en quelques clics. Exportez en CSV ou Google Sheets.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Go To Scraping - Web Scraping Simplifié',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Go To Scraping - Scraping de Commerces Locaux Simplifié',
+    description: 'Scrapez les données de milliers de commerces locaux en quelques clics.',
+    images: ['/og-image.png'],
+    creator: '@gotoagency',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://gotoscraping.com',
+  },
 }
 
 export default function RootLayout({
@@ -28,7 +77,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>
