@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { MapPin, Search, Download, Zap, Check } from "lucide-react"
+import { MapPin, Search, Download, Zap, Check, BookOpen, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -52,6 +52,11 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-4">
+            <Link href="/blog">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                Blog
+              </Button>
+            </Link>
             <ThemeToggle />
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
@@ -160,6 +165,83 @@ export default function HomePage() {
             <p className="text-lg text-muted-foreground">
               Rejoignez la liste d'attente pour être parmi les premiers à utiliser Go To Scraping
             </p>
+          </div>
+        </section>
+
+        {/* Blog Section */}
+        <section className="py-20 border-t border-border">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <BookOpen className="w-6 h-6 text-primary" />
+              <h2 className="text-3xl font-bold text-foreground">Derniers articles du blog</h2>
+            </div>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Guides, tutoriels et insights sur le web scraping et l'automatisation
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Link href="/blog/introduction-web-scraping-2025" className="group">
+              <article className="border border-border rounded-lg p-6 hover:shadow-lg transition-all bg-card h-full">
+                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                  Guide
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                  Introduction au Web Scraping en 2025
+                </h3>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  Découvrez les fondamentaux du web scraping et ses applications business
+                </p>
+                <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
+                  Lire l'article
+                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </article>
+            </Link>
+
+            <Link href="/blog/google-places-api-vs-scraping" className="group">
+              <article className="border border-border rounded-lg p-6 hover:shadow-lg transition-all bg-card h-full">
+                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                  Comparaison
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                  Google Places API vs Web Scraping
+                </h3>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  Quelle solution choisir pour collecter des données de commerces locaux ?
+                </p>
+                <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
+                  Lire l'article
+                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </article>
+            </Link>
+
+            <Link href="/blog/automatiser-prospection-commerciale" className="group">
+              <article className="border border-border rounded-lg p-6 hover:shadow-lg transition-all bg-card h-full">
+                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                  Business
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                  Automatiser votre Prospection Commerciale
+                </h3>
+                <p className="text-muted-foreground mb-4 leading-relaxed">
+                  Techniques et outils pour générer des leads qualifiés automatiquement
+                </p>
+                <div className="flex items-center text-sm text-primary font-medium group-hover:gap-2 transition-all">
+                  Lire l'article
+                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </article>
+            </Link>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/blog">
+              <Button variant="outline" size="lg" className="px-8">
+                Voir tous les articles
+              </Button>
+            </Link>
           </div>
         </section>
       </main>
