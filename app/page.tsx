@@ -15,6 +15,12 @@ import { FloatingDots } from "@/components/InteractiveGrid"
 import { ScrollProgress } from "@/components/ScrollProgress"
 import { OrganizationJsonLd, SoftwareApplicationJsonLd } from "@/components/BlogJsonLd"
 import { HeroIllustration } from "@/components/HeroIllustration"
+import { CustomCursor } from "@/components/CustomCursor"
+import { MagneticButton } from "@/components/MagneticButton"
+import { GradientText, ShimmerText } from "@/components/GradientText"
+import { Tilt3D } from "@/components/Tilt3D"
+import { ParallaxSection } from "@/components/ParallaxSection"
+import { RevealOnScroll } from "@/components/RevealOnScroll"
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth()
@@ -46,11 +52,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <OrganizationJsonLd />
       <SoftwareApplicationJsonLd />
       <ScrollProgress />
       <FloatingDots />
+      <CustomCursor />
 
       <nav className="border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -58,7 +65,9 @@ export default function HomePage() {
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <MapPin className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
-            <span className="text-xl font-semibold text-foreground">Go To Scraping</span>
+            <span className="text-xl font-semibold text-foreground">
+              <ShimmerText>Go To Scraping</ShimmerText>
+            </span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -90,9 +99,13 @@ export default function HomePage() {
               Bêta privée - Accès limité
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight text-balance">
-              <AnimatedText text="Scrapez les commerces" className="block" />
-              <AnimatedText text="locaux en quelques clics" className="block" />
+            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-balance">
+              <GradientText className="block mb-2">
+                <AnimatedText text="Scrapez les commerces" />
+              </GradientText>
+              <GradientText className="block">
+                <AnimatedText text="locaux en quelques clics" />
+              </GradientText>
             </h1>
 
             <p className="text-xl text-muted-foreground leading-relaxed text-pretty">
@@ -111,14 +124,14 @@ export default function HomePage() {
                     required
                     className="flex-1 h-12"
                   />
-                  <Button
+                  <MagneticButton
                     type="submit"
                     disabled={isLoading}
                     size="lg"
                     className="h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     {isLoading ? "..." : "Rejoindre la liste"}
-                  </Button>
+                  </MagneticButton>
                 </div>
                 <p className="text-sm text-muted-foreground mt-3">
                   Inscrivez-vous pour être notifié lors de l'ouverture publique
@@ -138,39 +151,45 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-16 border-t border-border">
+        <ParallaxSection speed={0.2} className="py-16 border-t border-border">
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="space-y-4 text-center">
-              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-                <Search className="w-7 h-7 text-primary" strokeWidth={2} />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground">Recherche intelligente</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Tapez "café Paris" et récupérez automatiquement tous les établissements de la ville
-              </p>
-            </div>
+            <RevealOnScroll delay={0}>
+              <Tilt3D className="space-y-4 text-center p-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+                  <Search className="w-7 h-7 text-primary" strokeWidth={2} />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Recherche intelligente</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Tapez "café Paris" et récupérez automatiquement tous les établissements de la ville
+                </p>
+              </Tilt3D>
+            </RevealOnScroll>
 
-            <div className="space-y-4 text-center">
-              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-                <MapPin className="w-7 h-7 text-primary" strokeWidth={2} />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground">Sélection par zone</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Dessinez un rectangle sur la carte pour cibler précisément une zone géographique
-              </p>
-            </div>
+            <RevealOnScroll delay={100}>
+              <Tilt3D className="space-y-4 text-center p-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+                  <MapPin className="w-7 h-7 text-primary" strokeWidth={2} />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Sélection par zone</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Dessinez un rectangle sur la carte pour cibler précisément une zone géographique
+                </p>
+              </Tilt3D>
+            </RevealOnScroll>
 
-            <div className="space-y-4 text-center">
-              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
-                <Download className="w-7 h-7 text-primary" strokeWidth={2} />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground">Export facile</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Exportez vos données en CSV ou copiez-les directement dans Google Sheets
-              </p>
-            </div>
+            <RevealOnScroll delay={200}>
+              <Tilt3D className="space-y-4 text-center p-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+                  <Download className="w-7 h-7 text-primary" strokeWidth={2} />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Export facile</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Exportez vos données en CSV ou copiez-les directement dans Google Sheets
+                </p>
+              </Tilt3D>
+            </RevealOnScroll>
           </div>
-        </section>
+        </ParallaxSection>
 
         <section className="py-20 text-center border-t border-border">
           <div className="max-w-2xl mx-auto space-y-6">
@@ -186,15 +205,19 @@ export default function HomePage() {
 
         {/* Blog Section */}
         <section className="py-20 border-t border-border">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 mb-4">
-              <BookOpen className="w-6 h-6 text-primary" />
-              <h2 className="text-3xl font-bold text-foreground">Derniers articles du blog</h2>
+          <RevealOnScroll>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <BookOpen className="w-6 h-6 text-primary" />
+                <h2 className="text-3xl font-bold">
+                  <GradientText>Derniers articles du blog</GradientText>
+                </h2>
+              </div>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Guides, tutoriels et insights sur le web scraping et l'automatisation
+              </p>
             </div>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Guides, tutoriels et insights sur le web scraping et l'automatisation
-            </p>
-          </div>
+          </RevealOnScroll>
 
           <div className="grid md:grid-cols-3 gap-8">
             <Link href="/blog/introduction-web-scraping-2025" className="group">
