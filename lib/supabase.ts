@@ -1,6 +1,125 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from "@supabase/ssr"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+let supabaseClient: ReturnType<typeof createBrowserClient> | null = null
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export function isSupabaseConfigured(): boolean {
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== "your_supabase_url" &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== "your_supabase_anon_key"
+  )
+}
+
+export function getSupabaseBrowserClient() {
+  if (!isSupabaseConfigured()) {
+    console.warn("[v0] Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    return null
+  }
+
+  if (supabaseClient) {
+    return supabaseClient
+  }
+
+  supabaseClient = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
+
+  return supabaseClient
+}
+
+export interface SearchHistoryEntry {
+  id: string
+  user_id: string
+  city: string
+  business_type: string
+  keywords: string | null
+  results_count: number
+  created_at: string
+}
+
+export async function saveSearchHistory(
+  userId: string,
+  city: string,
+  businessType: string,
+  keywords: string | null,
+  resultsCount: number,
+) {
+  const supabase = getSupabaseBrowserClient()
+
+  if (!supabase) {
+    const entry: SearchHistoryEntry = {
+      id: Date.now().toString(),
+      user_id: userId,
+      city,
+      business_type: businessType,
+      keywords,
+      results_count: resultsCount,
+      created_at: new Date().toISOString(),
+    }
+
+    const existing = JSON.parse(localStorage.getItem("search_history") || "[]")
+    localStorage.setItem("search_history", JSON.stringify([entry, ...existing]))
+    return entry
+  }
+
+  const { data, error } = await supabase
+    .from("search_history")
+    .insert({
+      user_id: userId,
+      city,
+      business_type: businessType,
+      keywords,
+      results_count: resultsCount,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error("[v0] Error saving search history:", error)
+    throw error
+  }
+
+  return data
+}
+
+export async function getSearchHistory(userId: string): Promise<SearchHistoryEntry[]> {
+  const supabase = getSupabaseBrowserClient()
+
+  if (!supabase) {
+    const history = JSON.parse(localStorage.getItem("search_history") || "[]")
+    return history
+  }
+
+  const { data, error } = await supabase
+    .from("search_history")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    console.error("[v0] Error fetching search history:", error)
+    throw error
+  }
+
+  return data || []
+}
+
+export async function deleteSearchHistory(historyIds: string[]) {
+  const supabase = getSupabaseBrowserClient()
+
+  if (!supabase) {
+    const history = JSON.parse(localStorage.getItem("search_history") || "[]")
+    const filtered = history.filter((item: SearchHistoryEntry) => !historyIds.includes(item.id))
+    localStorage.setItem("search_history", JSON.stringify(filtered))
+    return
+  }
+
+  const { error } = await supabase.from("search_history").delete().in("id", historyIds)
+
+  if (error) {
+    console.error("[v0] Error deleting search history:", error)
+    throw error
+  }
+}

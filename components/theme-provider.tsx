@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { createContext, useContext, useEffect, useState, useMemo } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 
 type Theme = "light" | "dark"
 
@@ -12,19 +12,6 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
-
-// Inline script to prevent FOUC
-const themeScript = `
-  (function() {
-    const theme = localStorage.getItem('theme') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.classList.add(theme);
-  })();
-`
-
-export function ThemeScriptTag() {
-  return <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-}
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark")
@@ -56,15 +43,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme((prev) => (prev === "light" ? "dark" : "light"))
   }
 
-  // Memoize context value to prevent unnecessary re-renders
-  const value = useMemo(() => ({ theme, toggleTheme }), [theme])
-
-  // Don't block rendering - show with default theme
+  // Prevent flash of wrong theme
   if (!mounted) {
-    return <ThemeContext.Provider value={{ theme: "dark", toggleTheme: () => {} }}>{children}</ThemeContext.Provider>
+    return null
   }
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {

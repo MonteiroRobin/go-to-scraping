@@ -2,18 +2,10 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import dynamic from "next/dynamic"
+import { ScraperInterface } from "@/components/scraper-interface"
+import { DatabaseTest } from "@/components/database-test"
+import { SetupGuide } from "@/components/setup-guide"
 import { useAuth } from "@/lib/auth-context"
-import { OnboardingTour } from "@/components/onboarding-tour"
-
-const ScraperInterface = dynamic(() => import("@/components/scraper-interface").then(mod => ({ default: mod.ScraperInterface })), {
-  loading: () => (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-muted-foreground">Chargement...</div>
-    </div>
-  ),
-  ssr: false
-})
 
 export default function ScraperPage() {
   const { user, isLoading } = useAuth()
@@ -21,7 +13,7 @@ export default function ScraperPage() {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login')
+      router.push("/login")
     }
   }, [user, isLoading, router])
 
@@ -38,9 +30,12 @@ export default function ScraperPage() {
   }
 
   return (
-    <>
-      <OnboardingTour />
+    <div className="space-y-0">
+      <div className="container mx-auto px-4 pt-4">
+        <DatabaseTest />
+      </div>
       <ScraperInterface />
-    </>
+      <SetupGuide />
+    </div>
   )
 }

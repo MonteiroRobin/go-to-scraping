@@ -4,74 +4,36 @@ import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-import { ThemeProvider, ThemeScriptTag } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/lib/auth-context"
-import { Toaster } from "@/components/ui/sonner"
 
-import { Inter } from 'next/font/google'
+import { Libre_Baskerville as V0_Font_Libre_Baskerville, IBM_Plex_Mono as V0_Font_IBM_Plex_Mono, Lora as V0_Font_Lora } from 'next/font/google'
+import { Inter, Libre_Baskerville as V0_Font_Libre_Baskerville, IBM_Plex_Mono as V0_Font_IBM_Plex_Mono, Lora as V0_Font_Lora } from 'next/font/google'
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: 'swap',
-  preload: true,
-})
+// Initialize fonts
+const _libreBaskerville = V0_Font_Libre_Baskerville({ subsets: ['latin'], weight: ["400","700"] })
+const _ibmPlexMono = V0_Font_IBM_Plex_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700"] })
+const _lora = V0_Font_Lora({ subsets: ['latin'], weight: ["400","500","600","700"] })
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "LocalScraper - Trouvez des entreprises locales en France",
-  description: "Extrayez rapidement des données sur les commerces et services près de chez vous. Gratuit, rapide et open source.",
-  keywords: "scraper, données locales, entreprises, commerces, France, extraction de données, OpenStreetMap",
-  authors: [{ name: "Go To Agency" }],
-  creator: "Go To Agency",
-  publisher: "Go To Agency",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  alternates: {
-    canonical: 'https://go-to-scraping.vercel.app',
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'fr_FR',
-    url: 'https://go-to-scraping.vercel.app',
-    title: "LocalScraper - Trouvez des entreprises locales en France",
-    description: "Extrayez rapidement des données sur les commerces et services près de chez vous.",
-    siteName: 'LocalScraper',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: "LocalScraper - Trouvez des entreprises locales en France",
-    description: "Extrayez rapidement des données sur les commerces et services près de chez vous.",
-  },
+  title: "Business Scraper",
+  description: "Minimalist local business scraping tool",
+  generator: "v0.app",
 }
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <head>
-        <ThemeScriptTag />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://maps.googleapis.com" />
-        <link rel="dns-prefetch" href="https://overpass-api.de" />
-        <link rel="dns-prefetch" href="https://overpass.kumi.systems" />
-      </head>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
-        <Toaster position="top-right" richColors closeButton />
         <Analytics />
       </body>
     </html>

@@ -1,35 +1,47 @@
 "use client"
 
-import { useState } from "react"
-import dynamic from "next/dynamic"
+import { useState, useCallback, useMemo } from "react"
+import { MapComponent } from "@/components/map-component"
+import { ResultsList } from "@/components/results-list"
 import { SearchBar, type SearchFilters } from "@/components/search-bar"
-import { Download, Loader2, LogOut, MapPin, History, Info } from "lucide-react"
+import { HistoryView } from "@/components/history-view"
+import {
+  Loader2,
+  LogOut,
+  History,
+  Search,
+  Map,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
 import { Progress } from "@/components/ui/progress"
-import { showSuccessToast, showErrorToast, showWarningToast, showInfoToast } from "@/lib/toast-utils"
-import { getCachedSearch, setCachedSearch, getCacheAge } from "@/lib/search-cache"
-import { canSearch } from "@/lib/throttle"
-
-const MapComponent = dynamic(() => import("@/components/map-component").then(mod => ({ default: mod.MapComponent })), {
-  loading: () => <div className="w-full h-full bg-muted flex items-center justify-center">Chargement de la carte...</div>,
-  ssr: false
-})
-
-const ResultsList = dynamic(() => import("@/components/results-list").then(mod => ({ default: mod.ResultsList })), {
-  loading: () => <div className="p-4 text-muted-foreground">Chargement des résultats...</div>,
-  ssr: false
-})
+import { saveSearchHistory } from "@/lib/supabase"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export interface Business {
   id: string
+  place_id?: string
   name: string
   address: string
   phone: string
   website: string
+  email: string
   lat: number
   lon: number
+  rating?: number
+  user_ratings_total?: number
+  description?: string
+  category?: string
+  tags?: string[]
+  estimated_price_range?: string
+  specialties?: string[]
+  enriched?: boolean
 }
 
 const OVERPASS_ENDPOINTS = [
@@ -38,12 +50,13 @@ const OVERPASS_ENDPOINTS = [
   "https://overpass.openstreetmap.ru/api/interpreter",
 ]
 
+type ViewMode = "search" | "map" | "history"
+
 export function ScraperInterface() {
   const { user, logout } = useAuth()
+  const [viewMode, setViewMode] = useState<ViewMode>("search")
   const [results, setResults] = useState<Business[]>([])
-  const [totalFound, setTotalFound] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [selectedZone, setSelectedZone] = useState<{
     north: number
@@ -52,9 +65,99 @@ export function ScraperInterface() {
     west: number
   } | null>(null)
   const [mapCenter, setMapCenter] = useState<{ lat: number; lon: number } | null>(null)
-  const [showResults, setShowResults] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [selectedHistoryIds, setSelectedHistoryIds] = useState<number[]>([])
+  const [showExplanation, setShowExplanation] = useState(false)
+  const [duplicateCount, setDuplicateCount] = useState(0)
+  const [newCount, setNewCount] = useState(0)
+
+  // Add Grok enrichment state variables
+  const [isEnriching, setIsEnriching] = useState(false)
+  const [enrichmentProgress, setEnrichmentProgress] = useState({ current: 0, total: 0 })
+  const [showGrokPrompt, setShowGrokPrompt] = useState(false)
+  const [canEnrich, setCanEnrich] = useState(false)
+
+  const statsDisplay = useMemo(() => {
+    if (results.length === 0) return null
+
+    return (
+      <div className="mt-6 space-y-4">
+        <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl border border-blue-200 dark:border-blue-700/50 shadow-lg dark:shadow-blue-900/20 transition-all duration-300">
+          <div className="flex items-center gap-6">
+            <div>
+              <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
+                {results.length}
+              </div>
+              <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                {results.length === 1 ? "commerce trouvé" : "commerces trouvés"}
+              </div>
+            </div>
+
+            {(newCount > 0 || duplicateCount > 0) && (
+              <div className="flex gap-4">
+                {newCount > 0 && (
+                  <div className="px-4 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-300 dark:border-green-700/50">
+                    <div className="text-2xl font-bold text-green-700 dark:text-green-300">{newCount}</div>
+                    <div className="text-xs text-green-600 dark:text-green-400">nouveaux</div>
+                  </div>
+                )}
+                {duplicateCount > 0 && (
+                  <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg border border-orange-300 dark:border-orange-700/50">
+                    <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">{duplicateCount}</div>
+                    <div className="text-xs text-orange-600 dark:text-orange-400">déjà scrapés</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isEnriching && enrichmentProgress.total > 0 && (
+              <div className="flex-1 min-w-[200px]">
+                <div className="flex items-center justify-between text-xs mb-2">
+                  <span className="text-purple-700 dark:text-purple-300 font-medium">
+                    Enrichissement Grok {enrichmentProgress.current}/{enrichmentProgress.total}
+                  </span>
+                  <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                    {Math.round((enrichmentProgress.current / enrichmentProgress.total) * 100)}%
+                  </span>
+                </div>
+                <Progress
+                  value={(enrichmentProgress.current / enrichmentProgress.total) * 100}
+                  className="h-2.5 bg-purple-100 dark:bg-purple-950/50"
+                />
+              </div>
+            )}
+
+            {isLoading && progress.total > 0 && !isEnriching && (
+              <div className="flex-1 min-w-[200px]">
+                <div className="flex items-center justify-between text-xs mb-2">
+                  <span className="text-blue-700 dark:text-blue-300 font-medium">
+                    Scraping {progress.current}/{progress.total}
+                  </span>
+                  <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                    {Math.round((progress.current / progress.total) * 100)}%
+                  </span>
+                </div>
+                <Progress
+                  value={(progress.current / progress.total) * 100}
+                  className="h-2.5 bg-blue-100 dark:bg-blue-950/50"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {duplicateCount > 0 && (
+          <Alert className="border-orange-300 dark:border-orange-700/50 bg-orange-50 dark:bg-orange-900/20">
+            <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            <AlertDescription className="text-orange-800 dark:text-orange-200">
+              {duplicateCount} {duplicateCount === 1 ? "établissement a" : "établissements ont"} déjà été scrapé
+              {duplicateCount > 1 ? "s" : ""} précédemment. Les données ont été mises à jour.
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
+    )
+  }, [results.length, isLoading, isEnriching, progress, enrichmentProgress, newCount, duplicateCount])
 
   const splitIntoChunks = (zone: { north: number; south: number; east: number; west: number }) => {
     const chunks: Array<{ north: number; south: number; east: number; west: number }> = []
@@ -197,6 +300,134 @@ export function ScraperInterface() {
     }
   }
 
+  const enrichWithGrok = async (businesses: Business[]): Promise<Business[]> => {
+    if (businesses.length === 0) return businesses
+
+    setIsEnriching(true)
+    setEnrichmentProgress({ current: 0, total: businesses.length })
+
+    const enrichedBusinesses: Business[] = []
+
+    // Process in batches of 5 to avoid rate limits
+    const BATCH_SIZE = 5
+    for (let i = 0; i < businesses.length; i += BATCH_SIZE) {
+      const batch = businesses.slice(i, i + BATCH_SIZE)
+
+      const batchPromises = batch.map(async (business, batchIndex) => {
+        try {
+          const response = await fetch("/api/enrich-with-grok", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ business }),
+          })
+
+          if (!response.ok) {
+            console.error("[v0] Error enriching business:", business.name)
+            return business
+          }
+
+          const data = await response.json()
+          setEnrichmentProgress({ current: i + batchIndex + 1, total: businesses.length })
+          return data.enrichedBusiness
+        } catch (error) {
+          console.error("[v0] Error enriching business:", error)
+          return business
+        }
+      })
+
+      const batchResults = await Promise.all(batchPromises)
+      enrichedBusinesses.push(...batchResults)
+
+      // Update results in real-time
+      setResults([...enrichedBusinesses])
+    }
+
+    setIsEnriching(false)
+    setEnrichmentProgress({ current: 0, total: 0 })
+
+    return enrichedBusinesses
+  }
+
+  const scrapeWithGooglePlaces = async (
+    location: { lat: number; lng: number },
+    businessType: string,
+    filters: SearchFilters,
+  ) => {
+    try {
+      // Map business types to Google Places types
+      const typeMapping: Record<string, string> = {
+        cafe: "cafe",
+        café: "cafe",
+        restaurant: "restaurant",
+        bar: "bar",
+        boulangerie: "bakery",
+        pharmacie: "pharmacy",
+        banque: "bank",
+        coiffeur: "hair_care",
+        supermarche: "supermarket",
+        supermarché: "supermarket",
+        hotel: "lodging",
+        hôtel: "lodging",
+        magasin: "store",
+      }
+
+      const lowerType = businessType.toLowerCase()
+      const googleType = typeMapping[lowerType] || ""
+
+      console.log("[v0] Scraping with Google Places API:", { location, type: googleType, keyword: filters.keywords })
+
+      const response = await fetch("/api/scrape-places", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          location,
+          radius: 5000, // 5km radius
+          type: googleType,
+          keyword: filters.keywords,
+          userId: user?.id,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Erreur lors du scraping")
+      }
+
+      const data = await response.json()
+      console.log("[v0] Google Places API response:", data)
+
+      // Update duplicate and new counts
+      setDuplicateCount(data.duplicateCount || 0)
+      setNewCount(data.newCount || 0)
+
+      // Convert to Business format
+      let businesses: Business[] = data.businesses.map((b: any) => ({
+        id: b.place_id,
+        place_id: b.place_id,
+        name: b.name,
+        address: b.address,
+        phone: b.phone,
+        website: b.website,
+        email: b.email,
+        lat: b.lat,
+        lon: b.lon,
+        rating: b.rating,
+        user_ratings_total: b.user_ratings_total,
+      }))
+
+      if (filters.useGrokEnrichment && businesses.length > 0) {
+        console.log("[v0] Enriching businesses with Grok AI...")
+        businesses = await enrichWithGrok(businesses)
+        console.log("[v0] Grok enrichment complete")
+      }
+
+      return businesses
+    } catch (error: any) {
+      console.error("[v0] Error scraping with Google Places:", error)
+      throw error
+    }
+  }
+
   const scrapeMultipleChunks = async (
     chunks: Array<{ north: number; south: number; east: number; west: number }>,
     businessType: string,
@@ -207,77 +438,127 @@ export function ScraperInterface() {
 
     setProgress({ current: 0, total: chunks.length })
 
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i]
+    const BATCH_SIZE = 3
 
-      try {
-        const lowerType = businessType.toLowerCase()
-        let query = ""
+    for (let batchStart = 0; batchStart < chunks.length; batchStart += BATCH_SIZE) {
+      const batch = chunks.slice(batchStart, batchStart + BATCH_SIZE)
 
-        if (lowerType.includes("cafe") || lowerType.includes("café")) {
-          query = `[out:json][timeout:60];node["amenity"="cafe"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("restaurant")) {
-          query = `[out:json][timeout:60];node["amenity"="restaurant"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("bar")) {
-          query = `[out:json][timeout:60];node["amenity"="bar"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("boulang")) {
-          query = `[out:json][timeout:60];node["shop"="bakery"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("pharmac")) {
-          query = `[out:json][timeout:60];node["amenity"="pharmacy"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("banque")) {
-          query = `[out:json][timeout:60];node["amenity"="bank"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("coiff")) {
-          query = `[out:json][timeout:60];node["shop"="hairdresser"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("supermarche") || lowerType.includes("supermarché")) {
-          query = `[out:json][timeout:60];node["shop"="supermarket"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("hotel") || lowerType.includes("hôtel")) {
-          query = `[out:json][timeout:60];node["tourism"="hotel"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else if (lowerType.includes("magasin")) {
-          query = `[out:json][timeout:60];node["shop"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
-        } else {
-          query = `[out:json][timeout:60];node["shop"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});out;`
+      // Process batch in parallel
+      const batchPromises = batch.map(async (chunk, batchIndex) => {
+        const chunkIndex = batchStart + batchIndex
+
+        try {
+          const lowerType = businessType.toLowerCase()
+          let query = ""
+
+          if (lowerType.includes("cafe") || lowerType.includes("café")) {
+            query = `[out:json][timeout:60];(node["amenity"="cafe"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["amenity"="cafe"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("restaurant")) {
+            query = `[out:json][timeout:60];(node["amenity"="restaurant"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["amenity"="restaurant"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("bar")) {
+            query = `[out:json][timeout:60];(node["amenity"="bar"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["amenity"="bar"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("boulang")) {
+            query = `[out:json][timeout:60];(node["shop"="bakery"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["shop"="bakery"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("pharmac")) {
+            query = `[out:json][timeout:60];(node["amenity"="pharmacy"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["amenity"="pharmacy"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("banque")) {
+            query = `[out:json][timeout:60];(node["amenity"="bank"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["amenity"="bank"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("coiff")) {
+            query = `[out:json][timeout:60];(node["shop"="hairdresser"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["shop"="hairdresser"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("supermarche") || lowerType.includes("supermarché")) {
+            query = `[out:json][timeout:60];(node["shop"="supermarket"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["shop"="supermarket"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("hotel") || lowerType.includes("hôtel")) {
+            query = `[out:json][timeout:60];(node["tourism"="hotel"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["tourism"="hotel"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else if (lowerType.includes("magasin")) {
+            query = `[out:json][timeout:60];(node["shop"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["shop"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          } else {
+            query = `[out:json][timeout:60];(node["shop"](${chunk.south},${chunk.west},${chunk.north},${chunk.east});way["shop"](${chunk.south},${chunk.west},${chunk.north},${chunk.east}););out center;`
+          }
+
+          const data = await fetchFromOverpass(query)
+
+          const businesses: Business[] = data.elements
+            .filter((element: any) => element.tags && element.tags.name)
+            .map((element: any) => {
+              // Extract phone with multiple possible tag names and clean formatting
+              let phone =
+                element.tags.phone ||
+                element.tags["contact:phone"] ||
+                element.tags.telephone ||
+                element.tags["contact:telephone"] ||
+                element.tags["phone:mobile"] ||
+                element.tags["contact:mobile"] ||
+                ""
+
+              // Clean phone number (remove spaces, dots, dashes for consistency)
+              if (phone && phone !== "Non disponible") {
+                phone = phone.trim()
+              } else {
+                phone = "Non disponible"
+              }
+
+              // Extract website with multiple possible tag names and ensure proper URL format
+              let website =
+                element.tags.website ||
+                element.tags["contact:website"] ||
+                element.tags.url ||
+                element.tags["contact:url"] ||
+                element.tags["website:official"] ||
+                ""
+
+              if (website && website !== "Non disponible") {
+                website = website.trim()
+                // Ensure website has protocol
+                if (website && !website.startsWith("http")) {
+                  website = "https://" + website
+                }
+              } else {
+                website = "Non disponible"
+              }
+
+              // Extract email with multiple possible tag names
+              const email =
+                element.tags.email ||
+                element.tags["contact:email"] ||
+                element.tags["contact:e-mail"] ||
+                "Non disponible"
+
+              // Get coordinates (handle both nodes and ways with center)
+              const lat = element.lat || element.center?.lat || 0
+              const lon = element.lon || element.center?.lon || 0
+
+              return {
+                id: element.id.toString(),
+                name: element.tags.name || "Sans nom",
+                address:
+                  [
+                    element.tags["addr:housenumber"],
+                    element.tags["addr:street"],
+                    element.tags["addr:postcode"],
+                    element.tags["addr:city"],
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || "Adresse non disponible",
+                phone,
+                website,
+                email,
+                lat,
+                lon,
+              }
+            })
+
+          return { chunkIndex, businesses }
+        } catch (error) {
+          console.error(`[v0] Error fetching chunk ${chunkIndex + 1}:`, error)
+          return { chunkIndex, businesses: [] }
         }
+      })
 
-        const data = await fetchFromOverpass(query)
+      // Wait for all chunks in the batch to complete
+      const batchResults = await Promise.all(batchPromises)
 
-        const businesses: Business[] = data.elements
-          .filter((element: any) => element.tags && element.tags.name)
-          .map((element: any) => {
-            // Extract phone with multiple possible tag names
-            const phone =
-              element.tags.phone ||
-              element.tags["contact:phone"] ||
-              element.tags.telephone ||
-              element.tags["contact:telephone"] ||
-              "Non disponible"
-
-            // Extract website with multiple possible tag names
-            const website =
-              element.tags.website ||
-              element.tags["contact:website"] ||
-              element.tags.url ||
-              element.tags["contact:url"] ||
-              "Non disponible"
-
-            return {
-              id: element.id.toString(),
-              name: element.tags.name || "Sans nom",
-              address:
-                [
-                  element.tags["addr:housenumber"],
-                  element.tags["addr:street"],
-                  element.tags["addr:postcode"],
-                  element.tags["addr:city"],
-                ]
-                  .filter(Boolean)
-                  .join(" ") || "Adresse non disponible",
-              phone,
-              website,
-              lat: element.lat,
-              lon: element.lon,
-            }
-          })
-
+      // Process results and update progress
+      for (const { chunkIndex, businesses } of batchResults) {
         // Remove duplicates
         businesses.forEach((business) => {
           if (!seenIds.has(business.id)) {
@@ -286,190 +567,142 @@ export function ScraperInterface() {
           }
         })
 
-        setProgress({ current: i + 1, total: chunks.length })
+        setProgress({ current: chunkIndex + 1, total: chunks.length })
         setResults([...allBusinesses])
-
-        // Small delay between requests to avoid overloading the API
-        if (i < chunks.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 500))
-        }
-      } catch (error) {
-        console.error(`[v0] Error fetching chunk ${i + 1}:`, error)
-        // Continue with next chunk even if one fails
       }
     }
 
-    // Apply filters FIRST
     let filteredBusinesses = allBusinesses
     if (filters.keywords) {
       const keywordLower = filters.keywords.toLowerCase()
       filteredBusinesses = filteredBusinesses.filter((b) => b.name.toLowerCase().includes(keywordLower))
     }
 
-    // Return both total and limited results
-    const totalBeforeLimit = filteredBusinesses.length
-    const limitedResults = filteredBusinesses.slice(0, 10)
+    if (filters.useGrokEnrichment) {
+      console.log("[v0] Grok enrichment enabled - this feature will enhance data quality when implemented")
+    }
 
-    // Store total in state for display
-    setTotalFound(totalBeforeLimit)
-
-    return limitedResults
+    return filteredBusinesses
   }
 
-  const handleSearch = async (
-    city: string,
-    businessType: string,
-    filters: SearchFilters,
-    location?: { lat: number; lon: number },
-  ) => {
-    console.log("[v0] handleSearch called with:", { city, businessType, filters, location })
+  const handleSearch = useCallback(
+    async (city: string, businessType: string, filters: SearchFilters, location?: { lat: number; lon: number }) => {
+      console.log("[v0] handleSearch called with:", { city, businessType, filters, location })
+      setIsLoading(true)
+      setResults([])
+      setDuplicateCount(0)
+      setNewCount(0)
+      setProgress({ current: 0, total: 1 })
+      setShowGrokPrompt(false)
+      setCanEnrich(false)
 
-    // Prevent double-click
-    if (isSearching) {
-      showWarningToast("Recherche en cours", "Veuillez patienter...")
-      return
-    }
+      try {
+        let cityLocation = location
+        if (!cityLocation) {
+          console.log("[v0] Geocoding city:", city)
+          cityLocation = await geocodeCity(city)
+        }
 
-    // Rate limiting
-    const { allowed, remaining } = canSearch()
-    if (!allowed) {
-      showWarningToast("Trop rapide!", `Veuillez attendre ${remaining}s avant de relancer une recherche`)
-      return
-    }
+        if (!cityLocation) {
+          console.error("[v0] City not found:", city)
+          alert("Ville non trouvée. Veuillez vérifier l'orthographe.")
+          setIsLoading(false)
+          return
+        }
 
-    // Check cache
-    const cacheKey = `${city}-${businessType}-${JSON.stringify(filters)}`
-    const cached = getCachedSearch(cacheKey)
-    if (cached) {
-      const age = getCacheAge(cacheKey)
-      const minutes = Math.floor((age || 0) / 60000)
-      showInfoToast("Résultats du cache", `Recherche effectuée il y a ${minutes} minute(s)`)
-      setResults(cached)
-      setTotalFound(cached.length)
-      return
-    }
+        console.log("[v0] City location:", cityLocation)
+        setMapCenter(cityLocation)
 
-    setIsSearching(true)
-    setIsLoading(true)
-    setResults([])
-    setProgress({ current: 0, total: 0 })
+        const businesses = await scrapeWithGooglePlaces(
+          { lat: cityLocation.lat, lng: cityLocation.lon },
+          businessType,
+          { ...filters, useGrokEnrichment: false },
+        )
 
-    try {
-      let cityLocation = location
-      if (!cityLocation) {
-        console.log("[v0] Geocoding city:", city)
-        cityLocation = await geocodeCity(city)
-      }
+        console.log("[v0] Search complete, found", businesses.length, "businesses")
+        setResults(businesses)
+        setProgress({ current: 1, total: 1 })
 
-      if (!cityLocation) {
-        console.error("[v0] City not found:", city)
-        showErrorToast("Ville non trouvée", "Veuillez vérifier l'orthographe ou sélectionner une ville dans l'autocomplétion")
+        if (businesses.length > 0) {
+          setCanEnrich(true)
+          setShowGrokPrompt(true)
+        }
+
+        // Save to history
+        if (user) {
+          try {
+            await saveSearchHistory(user.id, city, businessType || "Tous", filters.keywords || null, businesses.length)
+            console.log("[v0] Search history saved to database")
+          } catch (error) {
+            console.error("[v0] Error saving search history:", error)
+          }
+        }
+      } catch (error: any) {
+        console.error("[v0] Error searching businesses:", error)
+        alert(`❌ Erreur lors de la recherche: ${error.message}`)
+        setResults([])
+      } finally {
         setIsLoading(false)
-        setIsSearching(false)
-        return
+        setProgress({ current: 0, total: 0 })
       }
+    },
+    [user],
+  )
 
-      console.log("[v0] City location:", cityLocation)
-      setMapCenter(cityLocation)
-
-      const latOffset = 0.045 // ~5km
-      const lonOffset = 0.045
-      const zone = {
-        north: cityLocation.lat + latOffset,
-        south: cityLocation.lat - latOffset,
-        east: cityLocation.lon + lonOffset,
-        west: cityLocation.lon - lonOffset,
-      }
-
-      console.log("[v0] Search zone:", zone)
-      const chunks = splitIntoChunks(zone)
-      console.log("[v0] Split into", chunks.length, "chunks")
-
-      const businesses = await scrapeMultipleChunks(chunks, businessType, filters)
-
-      console.log("[v0] Search complete, displaying", businesses.length, "of", totalFound, "businesses")
-      setResults(businesses)
-      setSelectedZone(zone)
-
-      // Save to cache
-      setCachedSearch(cacheKey, businesses)
-
-      // Show limit warning if needed
-      if (businesses.length === 10 && totalFound > 10) {
-        showWarningToast("Limite atteinte", `${totalFound} résultats trouvés, 10 affichés. Version bêta limitée.`)
-      } else if (totalFound > 0) {
-        showSuccessToast("Recherche terminée", `${totalFound} résultat(s) trouvé(s)`)
-      }
-
-      // Save search history
-      const saved = localStorage.getItem("searchHistory")
-      const history = saved ? JSON.parse(saved) : []
-      const newEntry = {
-        id: history.length + 1,
-        timestamp: Date.now(),
-        city,
-        businessType,
-        filters,
-      }
-      history.push(newEntry)
-      localStorage.setItem("searchHistory", JSON.stringify(history))
-    } catch (error: any) {
-      console.error("[v0] Error searching businesses:", error)
-      showErrorToast("Erreur lors de la recherche", error.message || "Veuillez réessayer dans quelques instants")
-      setResults([])
-    } finally {
-      setIsLoading(false)
-      setIsSearching(false)
-      setProgress({ current: 0, total: 0 })
-    }
-  }
-
-  const handleZoneConfirm = async (zone: { north: number; south: number; east: number; west: number }) => {
-    console.log("[v0] handleZoneConfirm called with zone:", zone)
-
-    const validationError = validateZone(zone)
-    if (validationError) {
-      if (validationError.includes("trop petite")) {
-        showWarningToast("Zone trop petite", "Veuillez dessiner une zone plus grande (minimum 100m x 100m)")
-        return
-      }
-      // For warnings, show toast and continue
-      showWarningToast("Zone importante", validationError.split('\n')[0])
-    }
-
-    setSelectedZone(zone)
-    setIsLoading(true)
-    setResults([])
-    setProgress({ current: 0, total: 0 })
-
-    try {
-      const chunks = splitIntoChunks(zone)
-      const area = calculateZoneArea(zone)
-      console.log(`[v0] Zone area: ${area.toFixed(2)} km², split into ${chunks.length} chunks`)
-
-      const businesses = await scrapeMultipleChunks(chunks, "", {})
-
-      console.log("[v0] Zone scraping complete, found", businesses.length, "businesses")
-      setResults(businesses)
-
-      if (businesses.length === 0) {
-        showInfoToast("Aucun commerce trouvé", "Essayez une zone plus grande ou une autre zone")
-      }
-    } catch (error: any) {
-      console.error("[v0] Error fetching businesses:", error)
-      showErrorToast("Erreur de récupération", error.message || "Veuillez réessayer dans quelques instants")
-      setResults([])
-    } finally {
-      setIsLoading(false)
-      setIsSearching(false)
-      setProgress({ current: 0, total: 0 })
-    }
-  }
-
-  const handleExportCSV = () => {
+  const handleEnrichWithGrok = async () => {
     if (results.length === 0) return
 
-    const headers = ["Nom", "Adresse", "Téléphone", "Site Web", "Latitude", "Longitude"]
+    setShowGrokPrompt(false)
+    const enrichedBusinesses = await enrichWithGrok(results)
+    setResults(enrichedBusinesses)
+  }
+
+  const handleZoneConfirm = useCallback(
+    async (zone: { north: number; south: number; east: number; west: number }) => {
+      console.log("[v0] handleZoneConfirm called with zone:", zone)
+      setIsLoading(true)
+      setResults([])
+      setDuplicateCount(0)
+      setNewCount(0)
+      setProgress({ current: 0, total: 1 })
+
+      try {
+        // Calculate center of zone
+        const centerLat = (zone.north + zone.south) / 2
+        const centerLng = (zone.east + zone.west) / 2
+
+        // Calculate radius (approximate)
+        const latDiff = zone.north - zone.south
+        const lngDiff = zone.east - zone.west
+        const radius = (Math.max(latDiff, lngDiff) * 111000) / 2 // Convert to meters
+
+        console.log("[v0] Zone center:", { lat: centerLat, lng: centerLng }, "radius:", radius)
+
+        const businesses = await scrapeWithGooglePlaces({ lat: centerLat, lng: centerLng }, "", {})
+
+        console.log("[v0] Zone scraping complete, found", businesses.length, "businesses")
+        setResults(businesses)
+        setProgress({ current: 1, total: 1 })
+
+        if (businesses.length === 0) {
+          alert("ℹ️ Aucun commerce trouvé dans cette zone. Essayez une zone plus grande ou différente.")
+        }
+      } catch (error: any) {
+        console.error("[v0] Error fetching businesses:", error)
+        alert(error.message || "❌ Erreur lors de la récupération des données. Veuillez réessayer.")
+        setResults([])
+      } finally {
+        setIsLoading(false)
+        setProgress({ current: 0, total: 0 })
+      }
+    },
+    [user],
+  )
+
+  const handleExportCSV = useCallback(() => {
+    if (results.length === 0) return
+
+    const headers = ["Nom", "Adresse", "Téléphone", "Site Web", "Email", "Note", "Avis", "Latitude", "Longitude"]
     const csvRows = [
       headers.join(";"),
       ...results.map((business) =>
@@ -478,6 +711,9 @@ export function ScraperInterface() {
           `"${business.address.replace(/"/g, '""')}"`,
           `"${business.phone.replace(/"/g, '""')}"`,
           `"${business.website.replace(/"/g, '""')}"`,
+          `"${business.email.replace(/"/g, '""')}"`,
+          business.rating?.toString().replace(".", ",") || "",
+          business.user_ratings_total?.toString() || "",
           business.lat.toString().replace(".", ","),
           business.lon.toString().replace(".", ","),
         ].join(";"),
@@ -494,18 +730,21 @@ export function ScraperInterface() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-  }
+  }, [results])
 
-  const handleExportToSheets = async () => {
+  const handleExportToSheets = useCallback(async () => {
     if (results.length === 0) return
 
     try {
-      const headers = ["Nom", "Adresse", "Téléphone", "Site Web", "Latitude", "Longitude"]
+      const headers = ["Nom", "Adresse", "Téléphone", "Site Web", "Email", "Note", "Avis", "Latitude", "Longitude"]
       const rows = results.map((business) => [
         business.name,
         business.address,
         business.phone,
         business.website,
+        business.email,
+        business.rating || "",
+        business.user_ratings_total || "",
         business.lat,
         business.lon,
       ])
@@ -514,12 +753,14 @@ export function ScraperInterface() {
 
       await navigator.clipboard.writeText(sheetsData)
 
-      showSuccessToast("Données copiées!", "Vous pouvez maintenant coller dans Google Sheets (Ctrl+V)")
+      alert(
+        "✅ Données copiées dans le presse-papier!\n\nVous pouvez maintenant:\n1. Ouvrir Google Sheets\n2. Créer une nouvelle feuille\n3. Coller les données (Ctrl+V ou Cmd+V)\n\nLes colonnes seront automatiquement séparées.",
+      )
     } catch (error) {
       console.error("[v0] Error exporting to Sheets:", error)
-      showErrorToast("Erreur de copie", "Impossible de copier les données. Veuillez réessayer.")
+      alert("❌ Erreur lors de la copie des données. Veuillez réessayer.")
     }
-  }
+  }, [results])
 
   const handleCitySelect = (city: string, location: { lat: number; lon: number }) => {
     setMapCenter(location)
@@ -527,7 +768,7 @@ export function ScraperInterface() {
 
   const handleExportHistory = () => {
     if (selectedHistoryIds.length === 0) {
-      showWarningToast("Aucune sélection", "Veuillez sélectionner au moins un élément de l'historique")
+      alert("Veuillez sélectionner au moins un élément de l'historique à exporter.")
       return
     }
 
@@ -563,10 +804,9 @@ export function ScraperInterface() {
       document.body.removeChild(link)
 
       setSelectedHistoryIds([])
-      showSuccessToast("Historique exporté!", `${selectedItems.length} recherche(s) exportée(s) en CSV`)
     } catch (error) {
       console.error("[v0] Error exporting history:", error)
-      showErrorToast("Erreur d'export", "Impossible d'exporter l'historique")
+      alert("❌ Erreur lors de l'export de l'historique.")
     }
   }
 
@@ -590,18 +830,18 @@ export function ScraperInterface() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
-      <header className="sticky top-0 z-50 border-b border-border/40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-gray-900/70 shadow-sm">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950/10 transition-colors duration-300">
+      <header className="sticky top-0 z-50 border-b border-border/40 dark:border-border/20 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-sm dark:shadow-gray-950/50 transition-all duration-300">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
                 Business Scraper
               </h1>
               {user && (
-                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/40 rounded-full border border-blue-200 dark:border-blue-700">
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-950/40 rounded-full border border-blue-200 dark:border-blue-800/50 transition-colors duration-300">
                   <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse shadow-lg shadow-blue-500/50" />
-                  <span className="text-sm font-medium text-blue-900 dark:text-blue-200">{user.name}</span>
+                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">{user.name}</span>
                 </div>
               )}
             </div>
@@ -612,240 +852,289 @@ export function ScraperInterface() {
                 onClick={logout}
                 variant="ghost"
                 size="sm"
-                className="gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-foreground"
+                className="gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-foreground transition-colors duration-200"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Déconnexion</span>
               </Button>
             </div>
           </div>
+
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setViewMode("search")}
+              variant={viewMode === "search" ? "default" : "ghost"}
+              className={`flex-1 gap-2 transition-all duration-200 ${
+                viewMode === "search"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md dark:shadow-blue-900/30"
+                  : "hover:bg-blue-50 dark:hover:bg-blue-950/30 text-foreground"
+              }`}
+            >
+              <Search className="w-4 h-4" />
+              Recherche
+            </Button>
+            <Button
+              onClick={() => setViewMode("map")}
+              variant={viewMode === "map" ? "default" : "ghost"}
+              className={`flex-1 gap-2 transition-all duration-200 ${
+                viewMode === "map"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md dark:shadow-blue-900/30"
+                  : "hover:bg-blue-50 dark:hover:bg-blue-950/30 text-foreground"
+              }`}
+            >
+              <Map className="w-4 h-4" />
+              Carte
+            </Button>
+            <Button
+              onClick={() => setViewMode("history")}
+              variant={viewMode === "history" ? "default" : "ghost"}
+              className={`flex-1 gap-2 transition-all duration-200 ${
+                viewMode === "history"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md dark:shadow-blue-900/30"
+                  : "hover:bg-blue-50 dark:hover:bg-blue-950/30 text-foreground"
+              }`}
+            >
+              <History className="w-4 h-4" />
+              Historique
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-600 dark:to-orange-600 border-b border-amber-600 dark:border-amber-700">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-center gap-3 text-white">
-            <div className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full">
-              <span className="text-xs font-bold uppercase tracking-wider">Beta</span>
-            </div>
-            <p className="text-sm font-medium">
-              Version bêta - Limité à 10 résultats pour préserver les crédits API gratuits
-            </p>
-          </div>
+      {viewMode === "history" ? (
+        <div className="container mx-auto px-4 py-8">
+          <HistoryView
+            onSearch={(city, businessType, keywords) => {
+              setViewMode("search")
+              handleSearch(city, businessType, { keywords })
+            }}
+          />
         </div>
-      </div>
+      ) : viewMode === "search" ? (
+        <>
+          <div className="border-b border-border/40 dark:border-border/20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm dark:shadow-gray-950/30 transition-all duration-300">
+            <div className="container mx-auto px-4 py-6">
+              <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
 
-      <div className="border-b border-border/40 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
+              <div className="mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowExplanation(!showExplanation)}
+                  className="w-full justify-between border-blue-200 dark:border-blue-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 bg-white dark:bg-gray-800/50 transition-all duration-200"
+                >
+                  <span className="flex items-center gap-2">
+                    <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span className="font-medium text-foreground">Comment fonctionne le scraping ?</span>
+                  </span>
+                  {showExplanation ? (
+                    <ChevronUp className="w-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </Button>
 
-          <div className="mt-6">
-            <Button
-              id="history-button"
-              variant="outline"
-              onClick={() => setShowHistory(!showHistory)}
-              className="w-full justify-between border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 bg-white dark:bg-gray-800"
-              aria-label="Afficher ou masquer l'historique des recherches"
-            >
-              <span className="flex items-center gap-2">
-                <History className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="font-medium text-foreground">Historique des recherches</span>
-              </span>
-              <span className="text-xs text-muted-foreground">{showHistory ? "Masquer" : "Afficher"}</span>
-            </Button>
+                {showExplanation && (
+                  <div className="mt-4 p-6 bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800/80 dark:to-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800/50 shadow-lg dark:shadow-blue-950/20 space-y-4 transition-all duration-300">
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                        Source des données : Google Places API
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Notre outil utilise l'<span className="font-medium text-foreground">API Google Places</span>{" "}
+                        pour extraire les données de commerces depuis la base de données Google Maps. Les informations
+                        récupérées incluent le nom, l'adresse, le téléphone, le site web, les notes et avis des
+                        établissements.
+                      </p>
+                    </div>
 
-            {showHistory && (
-              <div className="mt-4 p-6 bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 shadow-md">
-                {(() => {
-                  const saved = localStorage.getItem("searchHistory")
-                  if (!saved) return <p className="text-sm text-muted-foreground text-center py-4">Aucun historique</p>
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full" />
+                        Détection des doublons
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Chaque établissement scrappé est enregistré dans la base de données avec son identifiant unique
+                        Google (place_id). Si vous scrappez à nouveau un établissement déjà enregistré, le système le
+                        détecte automatiquement et vous en informe, évitant ainsi les doublons.
+                      </p>
+                    </div>
 
-                  try {
-                    const history = JSON.parse(saved)
-                    if (history.length === 0) {
-                      return <p className="text-sm text-muted-foreground text-center py-4">Aucun historique</p>
-                    }
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                        Limite de 100 résultats
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Pour optimiser les performances et respecter les quotas API, chaque recherche est limitée à{" "}
+                        <span className="font-medium text-foreground">100 établissements maximum</span>. Si vous avez
+                        besoin de plus de résultats, effectuez plusieurs recherches avec des critères différents.
+                      </p>
+                    </div>
 
-                    return (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-3 border-b border-blue-200 dark:border-blue-800">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-foreground">
-                              {selectedHistoryIds.length > 0
-                                ? `${selectedHistoryIds.length} sélectionné${selectedHistoryIds.length > 1 ? "s" : ""}`
-                                : `${history.length} recherche${history.length > 1 ? "s" : ""}`}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {selectedHistoryIds.length > 0 ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={deselectAllHistory}
-                                  className="text-xs h-8 bg-transparent"
-                                >
-                                  Désélectionner tout
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={handleExportHistory}
-                                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-xs h-8 gap-1"
-                                >
-                                  <Download className="w-3 h-3" />
-                                  Exporter la sélection
-                                </Button>
-                              </>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={selectAllHistory}
-                                className="text-xs h-8 bg-transparent"
-                              >
-                                Tout sélectionner
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="grid gap-3 max-h-96 overflow-y-auto pr-2">
-                          {history.map((entry: any) => (
-                            <div
-                              key={entry.id}
-                              className={`p-4 rounded-lg border transition-all cursor-pointer ${
-                                selectedHistoryIds.includes(entry.id)
-                                  ? "bg-blue-50 dark:bg-blue-900/40 border-blue-300 dark:border-blue-600 shadow-sm"
-                                  : "bg-white dark:bg-gray-800 border-border hover:border-blue-200 dark:hover:border-blue-700"
-                              }`}
-                              onClick={() => toggleHistorySelection(entry.id)}
-                            >
-                              <div className="flex items-start gap-3">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedHistoryIds.includes(entry.id)}
-                                  onChange={() => toggleHistorySelection(entry.id)}
-                                  className="mt-1 w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:bg-gray-700"
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <span className="font-medium text-foreground">
-                                      {entry.businessType || "Tous les commerces"}
-                                    </span>
-                                    <span className="text-muted-foreground">à</span>
-                                    <span className="font-medium text-blue-600 dark:text-blue-400">{entry.city}</span>
-                                  </div>
-                                  {entry.filters.keywords && (
-                                    <div className="text-sm text-muted-foreground mb-1">
-                                      Mots-clés: {entry.filters.keywords}
-                                    </div>
-                                  )}
-                                  <div className="text-xs text-muted-foreground">
-                                    {new Date(entry.timestamp).toLocaleDateString("fr-FR", {
-                                      day: "numeric",
-                                      month: "long",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  } catch (e) {
-                    console.error("[v0] Error loading history:", e)
-                    return <p className="text-sm text-red-500 text-center py-4">Erreur de chargement de l'historique</p>
-                  }
-                })()}
-              </div>
-            )}
-          </div>
-
-          {results.length > 0 && (
-            <div className="mt-6 flex items-center justify-between p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/40 dark:to-blue-800/30 rounded-xl border border-blue-200 dark:border-blue-700 shadow-md">
-              <div className="flex items-center gap-6">
-                <div>
-                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
-                    {results.length}
+                    <div className="pt-4 border-t border-blue-200 dark:border-blue-800/50">
+                      <p className="text-xs text-muted-foreground">
+                        💡 <span className="font-medium">Astuce</span> : Les données Google Places sont généralement
+                        plus complètes et à jour que celles d'OpenStreetMap, avec des informations de contact fiables et
+                        des avis clients.
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-                    {results.length === 1 ? "commerce trouvé" : "commerces trouvés"}
+                )}
+              </div>
+
+              {statsDisplay}
+
+              {showGrokPrompt && canEnrich && !isEnriching && (
+                <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-700/30 rounded-xl border-2 border-gray-300 dark:border-gray-600/50 shadow-lg dark:shadow-gray-900/20">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Enrichir avec Grok AI ?
+                      </h3>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                        Grok AI peut analyser et enrichir vos {results.length} résultats avec :
+                      </p>
+                      <ul className="text-sm text-gray-600 dark:text-gray-400 mb-4 space-y-1 ml-4">
+                        <li>• Descriptions détaillées et points forts uniques</li>
+                        <li>• Informations de contact manquantes (téléphone, email, site web)</li>
+                        <li>• Meilleurs moments pour visiter et public cible</li>
+                        <li>• Informations pratiques (parking, accessibilité, paiements)</li>
+                        <li>• Spécialités et caractéristiques uniques</li>
+                      </ul>
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={handleEnrichWithGrok}
+                          className="bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white shadow-md"
+                        >
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Enrichir maintenant
+                        </Button>
+                        <Button
+                          onClick={() => setShowGrokPrompt(false)}
+                          variant="outline"
+                          className="border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                        >
+                          Plus tard
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              )}
+            </div>
+          </div>
 
-                {isLoading && progress.total > 0 && (
-                  <div className="flex-1 min-w-[200px]">
+          {(isLoading || isEnriching) && (
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 border-b border-blue-200 dark:border-blue-800/50 transition-all duration-300">
+              <div className="container mx-auto px-4 py-4">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    {isEnriching
+                      ? "Enrichissement des données avec Grok AI..."
+                      : "Scraping avec Google Places API en cours..."}
+                  </span>
+                </div>
+                {isEnriching && enrichmentProgress.total > 0 && (
+                  <div className="mt-4">
                     <div className="flex items-center justify-between text-xs mb-2">
-                      <span className="text-blue-700 dark:text-blue-300 font-medium">
-                        Zone {progress.current}/{progress.total}
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">
+                        Enrichissement Grok {enrichmentProgress.current}/{enrichmentProgress.total}
                       </span>
-                      <span className="text-blue-600 dark:text-blue-400 font-semibold">
-                        {Math.round((progress.current / progress.total) * 100)}%
+                      <span className="text-gray-900 dark:text-gray-100 font-semibold">
+                        {Math.round((enrichmentProgress.current / enrichmentProgress.total) * 100)}%
                       </span>
                     </div>
                     <Progress
-                      value={(progress.current / progress.total) * 100}
-                      className="h-2.5 bg-blue-100 dark:bg-blue-950"
+                      value={(enrichmentProgress.current / enrichmentProgress.total) * 100}
+                      className="h-2.5 bg-gray-200 dark:bg-gray-700"
                     />
                   </div>
+                )}
+                {isLoading && progress.total > 0 && !isEnriching && (
+                  <Progress
+                    value={(progress.current / progress.total) * 100}
+                    className="mt-4 h-2.5 bg-blue-100 dark:bg-blue-950/50"
+                  />
                 )}
               </div>
             </div>
           )}
-        </div>
-      </div>
 
-      {isLoading && (
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/40 dark:to-blue-800/30 border-b border-blue-200 dark:border-blue-700">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center gap-3">
-              <Loader2 className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400" />
-              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                {progress.total > 0
-                  ? `Scraping en cours... Zone ${progress.current}/${progress.total}`
-                  : "Initialisation de la recherche..."}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="rounded-2xl overflow-hidden border border-border/40 shadow-2xl" style={{ height: "700px" }}>
-          <MapComponent
-            onZoneConfirm={handleZoneConfirm}
-            markers={results.map((r) => ({ lat: r.lat, lon: r.lon, name: r.name }))}
-            selectedZone={selectedZone}
-            centerLocation={mapCenter}
-          />
-        </div>
-
-        {results.length === 0 && !isLoading && (
-          <div className="mt-8 text-center p-12 bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-900/30 dark:to-gray-800 rounded-2xl border border-dashed border-blue-300 dark:border-blue-700 shadow-sm">
-            <div className="max-w-md mx-auto space-y-3">
-              <div className="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center">
-                <MapPin className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          <div className="container mx-auto px-4 py-8">
+            {results.length === 0 && !isLoading && (
+              <div className="text-center p-12 bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-gray-800/50 rounded-2xl border border-dashed border-blue-300 dark:border-blue-800/50 shadow-sm dark:shadow-blue-900/10 transition-all duration-300">
+                <div className="max-w-md mx-auto space-y-3">
+                  <div className="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-950/40 rounded-full flex items-center justify-center transition-colors duration-300">
+                    <Search className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <p className="text-blue-900 dark:text-blue-200 font-medium">Commencez votre recherche</p>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    Entrez une ville et un type de commerce, puis cliquez sur "Rechercher"
+                  </p>
+                </div>
               </div>
-              <p className="text-blue-900 dark:text-blue-200 font-medium">Commencez votre recherche</p>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                Sélectionnez une ville et cliquez sur "Rechercher" ou dessinez une zone sur la carte
+            )}
+
+            {results.length > 0 && (
+              <div className="rounded-2xl overflow-hidden border border-border/40 dark:border-border/20 shadow-xl dark:shadow-gray-950/50 bg-white dark:bg-gray-800/50 transition-all duration-300">
+                <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Map View */}
+          <div className="container mx-auto px-4 py-8">
+            <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50 shadow-lg dark:shadow-blue-900/20 transition-all duration-300">
+              <h2 className="text-lg font-semibold text-foreground mb-2">Sélection par zone</h2>
+              <p className="text-sm text-muted-foreground">
+                Utilisez les outils de dessin pour sélectionner une zone sur la carte, puis cliquez sur "Confirmer" pour
+                scraper les commerces dans cette zone.
               </p>
             </div>
-          </div>
-        )}
-      </div>
 
-      {results.length > 0 && (
-        <div className="container mx-auto px-4 pb-8">
-          <div className="rounded-2xl overflow-hidden border border-border/40 shadow-xl bg-white dark:bg-gray-800">
-            <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
+            <div
+              className="rounded-2xl overflow-hidden border border-border/40 dark:border-border/20 shadow-2xl dark:shadow-gray-950/50 transition-all duration-300"
+              style={{ height: "700px" }}
+            >
+              <MapComponent
+                onZoneConfirm={handleZoneConfirm}
+                markers={results.map((r) => ({ lat: r.lat, lon: r.lon, name: r.name }))}
+                selectedZone={selectedZone}
+                centerLocation={mapCenter}
+              />
+            </div>
+
+            {isLoading && (
+              <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50">
+                <div className="flex items-center gap-3 mb-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    Scraping avec Google Places API en cours...
+                  </span>
+                </div>
+                {progress.total > 0 && (
+                  <Progress
+                    value={(progress.current / progress.total) * 100}
+                    className="h-2.5 bg-blue-100 dark:bg-blue-950/50"
+                  />
+                )}
+              </div>
+            )}
+
+            {results.length > 0 && (
+              <div className="mt-6 rounded-2xl overflow-hidden border border-border/40 dark:border-border/20 shadow-xl dark:shadow-gray-950/50 bg-white dark:bg-gray-800/50 transition-all duration-300">
+                <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
+              </div>
+            )}
           </div>
-        </div>
+        </>
       )}
     </div>
   )

@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "./supabase"
 
 interface User {
   id: string
@@ -19,75 +18,46 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const INTERNAL_USER = {
+  id: "internal-001",
+  email: "contact@go-to-agency.com",
+  password: "GTA2024!Scraper",
+  name: "Go To Agency",
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    // Check active session on mount
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-        })
-      }
-      setIsLoading(false)
+    // Check if user is logged in on mount
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
     }
-
-    checkSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-        })
-      } else {
-        setUser(null)
-      }
-    })
-
-    return () => subscription.unsubscribe()
+    setIsLoading(false)
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) {
-        console.error('Login error:', error.message)
-        return false
+    if (email === INTERNAL_USER.email && password === INTERNAL_USER.password) {
+      const userWithoutPassword = {
+        id: INTERNAL_USER.id,
+        email: INTERNAL_USER.email,
+        name: INTERNAL_USER.name,
       }
-
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email!,
-          name: data.user.user_metadata?.name || data.user.email!.split('@')[0],
-        })
-        return true
-      }
-
-      return false
-    } catch (error) {
-      console.error('Login error:', error)
-      return false
+      setUser(userWithoutPassword)
+      localStorage.setItem("user", JSON.stringify(userWithoutPassword))
+      return true
     }
+
+    return false
   }
 
-  const logout = async () => {
-    await supabase.auth.signOut()
+  const logout = () => {
     setUser(null)
-    router.push('/')
+    localStorage.removeItem("user")
+    router.push("/")
   }
 
   return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>

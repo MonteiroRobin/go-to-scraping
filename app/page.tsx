@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -19,7 +20,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/scraper')
+      router.push("/scraper")
     }
   }, [user, authLoading, router])
 
@@ -63,96 +64,111 @@ export default function HomePage() {
 
       <main className="max-w-6xl mx-auto px-6">
         <section className="py-20 text-center">
-          <div className="inline-block mb-6 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-            Extraction de données locales 🇫🇷
+          <div className="max-w-3xl mx-auto space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              Bêta privée - Accès limité
+            </div>
+
+            <h1 className="text-5xl font-bold text-foreground leading-tight text-balance">
+              Scrapez les commerces locaux en quelques clics
+            </h1>
+
+            <p className="text-xl text-muted-foreground leading-relaxed text-pretty">
+              Sélectionnez une zone sur la carte, récupérez instantanément les données de tous les commerces locaux, et
+              exportez-les en CSV ou Google Sheets.
+            </p>
+
+            {!isSubmitted ? (
+              <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto pt-4">
+                <div className="flex gap-3">
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="votre@email.com"
+                    required
+                    className="flex-1 h-12"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    size="lg"
+                    className="h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    {isLoading ? "..." : "Rejoindre la liste"}
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Inscrivez-vous pour être notifié lors de l'ouverture publique
+                </p>
+              </form>
+            ) : (
+              <div className="max-w-md mx-auto pt-4 space-y-4">
+                <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-primary/10 text-primary">
+                  <Check className="w-5 h-5" />
+                  <span className="font-medium">Vous êtes sur la liste d'attente !</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Nous vous contacterons dès que l'accès sera ouvert au public.
+                </p>
+              </div>
+            )}
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-            Trouvez des entreprises locales en quelques secondes
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Extrayez des données précises sur les commerces et services près de chez vous.
-            Rapide, gratuit et open source.
-          </p>
+        </section>
 
-          {!isSubmitted ? (
-            <form onSubmit={handleWaitlistSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-12">
-              <Input
-                type="email"
-                placeholder="Votre email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="flex-1 h-12 px-4"
-              />
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                {isLoading ? "En cours..." : "Rejoindre la liste d'attente"}
-              </Button>
-            </form>
-          ) : (
-            <div className="max-w-md mx-auto mb-12 p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400">
-              <Check className="w-5 h-5 inline-block mr-2" />
-              Merci ! Vous êtes sur la liste d'attente.
+        <section className="py-16 border-t border-border">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="space-y-4 text-center">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+                <Search className="w-7 h-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">Recherche intelligente</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Tapez "café Paris" et récupérez automatiquement tous les établissements de la ville
+              </p>
             </div>
-          )}
 
-          <div className="flex flex-wrap justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-primary" />
-              <span>Extraction rapide</span>
+            <div className="space-y-4 text-center">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+                <MapPin className="w-7 h-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">Sélection par zone</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Dessinez un rectangle sur la carte pour cibler précisément une zone géographique
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Download className="w-4 h-4 text-primary" />
-              <span>Export CSV/JSON</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Search className="w-4 h-4 text-primary" />
-              <span>Recherche par zone</span>
+
+            <div className="space-y-4 text-center">
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+                <Download className="w-7 h-7 text-primary" strokeWidth={2} />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground">Export facile</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Exportez vos données en CSV ou copiez-les directement dans Google Sheets
+              </p>
             </div>
           </div>
         </section>
 
-        <section className="py-16 grid md:grid-cols-3 gap-8">
-          <div className="p-6 rounded-lg border border-border bg-card">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-              <Search className="w-6 h-6 text-primary" />
+        <section className="py-20 text-center border-t border-border">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <Zap className="w-8 h-8 text-primary" strokeWidth={2} />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Recherche intuitive
-            </h3>
-            <p className="text-muted-foreground">
-              Recherchez par ville ou dessinez une zone personnalisée sur la carte pour cibler précisément vos besoins.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-lg border border-border bg-card">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-              <Zap className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Résultats instantanés
-            </h3>
-            <p className="text-muted-foreground">
-              Obtenez des listes complètes avec noms, adresses, téléphones et sites web en quelques secondes.
-            </p>
-          </div>
-
-          <div className="p-6 rounded-lg border border-border bg-card">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-              <Download className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Export flexible
-            </h3>
-            <p className="text-muted-foreground">
-              Exportez vos données au format CSV ou JSON pour les utiliser dans vos outils préférés.
+            <h2 className="text-3xl font-bold text-foreground">Accès anticipé disponible</h2>
+            <p className="text-lg text-muted-foreground">
+              Rejoignez la liste d'attente pour être parmi les premiers à utiliser LocalScraper
             </p>
           </div>
         </section>
       </main>
+
+      <footer className="border-t border-border mt-12">
+        <div className="max-w-6xl mx-auto px-6 py-8 text-center text-sm text-muted-foreground">
+          © 2025 LocalScraper - Go To Agency. Tous droits réservés.
+        </div>
+      </footer>
     </div>
   )
 }

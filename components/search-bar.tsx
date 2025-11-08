@@ -2,10 +2,10 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { MapPin, Search } from "lucide-react"
+import { Search, Sparkles, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 
 interface SearchBarProps {
   onSearch: (
@@ -14,32 +14,94 @@ interface SearchBarProps {
     filters: SearchFilters,
     location?: { lat: number; lon: number },
   ) => void
-  onCitySelect?: (city: string, location: { lat: number; lon: number }) => void
   isLoading: boolean
 }
 
 export interface SearchFilters {
   keywords: string
+  useGrokEnrichment?: boolean
 }
 
-export function SearchBar({ onSearch, onCitySelect, isLoading }: SearchBarProps) {
-  const [cityQuery, setCityQuery] = useState("")
-  const [businessType, setBusinessType] = useState("")
-  const [keywords, setKeywords] = useState("")
+const KEYWORD_RECOMMENDATIONS: Record<string, string[]> = {
+  café: ["ouvert dimanche", "wifi gratuit", "terrasse", "petit déjeuner", "parking"],
+  restaurant: ["livraison", "terrasse", "menu midi", "parking", "réservation"],
+  bar: ["happy hour", "terrasse", "sport", "billard", "ouvert tard"],
+  boulangerie: ["ouvert dimanche", "sans gluten", "livraison", "parking", "sandwicherie"],
+  pharmacie: ["ouvert dimanche", "de garde", "livraison", "parking", "orthopédie"],
+  banque: ["distributeur 24h", "parking", "conseiller", "ouvert samedi", "accessible PMR"],
+  coiffeur: ["sans rendez-vous", "homme", "femme", "enfant", "parking"],
+  supermarché: ["ouvert dimanche", "livraison", "drive", "parking gratuit", "bio"],
+  hôtel: ["parking gratuit", "wifi gratuit", "petit déjeuner", "animaux acceptés", "piscine"],
+  magasin: ["ouvert dimanche", "parking", "livraison", "retrait gratuit", "soldes"],
+}
+
+export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
+  const [searchQuery, setSearchQuery] = useState("")
   const [citySuggestions, setCitySuggestions] = useState<any[]>([])
   const [showCitySuggestions, setShowCitySuggestions] = useState(false)
-  const cityInputRef = useRef<HTMLDivElement>(null)
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
+  const [recommendedKeywords, setRecommendedKeywords] = useState<string[]>([])
+  const searchInputRef = useRef<HTMLDivElement>(null)
+
+  const parseSearchQuery = (query: string) => {
+    const lowerQuery = query.toLowerCase().trim()
+
+    // Common patterns: "café à Paris", "restaurant Lyon", "Paris café"
+    const patterns = [
+      /(.+?)\s+à\s+(.+)/, // "café à Paris"
+      /(.+?)\s+(.+)/, // "café Paris" or "Paris café"
+    ]
+
+    for (const pattern of patterns) {
+      const match = lowerQuery.match(pattern)
+      if (match) {
+        const [, part1, part2] = match
+
+        // Check which part is the business type
+        const businessTypes = Object.keys(KEYWORD_RECOMMENDATIONS)
+        const isFirstPartBusiness = businessTypes.some((type) => part1.includes(type))
+        const isSecondPartBusiness = businessTypes.some((type) => part2.includes(type))
+
+        if (isFirstPartBusiness) {
+          return { businessType: part1.trim(), city: part2.trim() }
+        } else if (isSecondPartBusiness) {
+          return { businessType: part2.trim(), city: part1.trim() }
+        }
+      }
+    }
+
+    // If no pattern matches, assume it's just a city
+    return { businessType: "", city: lowerQuery }
+  }
+
+  useEffect(() => {
+    const { businessType } = parseSearchQuery(searchQuery)
+
+    if (businessType) {
+      const matchingType = Object.keys(KEYWORD_RECOMMENDATIONS).find((type) => businessType.includes(type))
+
+      if (matchingType) {
+        setRecommendedKeywords(KEYWORD_RECOMMENDATIONS[matchingType])
+      } else {
+        setRecommendedKeywords([])
+      }
+    } else {
+      setRecommendedKeywords([])
+    }
+  }, [searchQuery])
 
   useEffect(() => {
     const searchCities = async () => {
-      if (cityQuery.length < 2) {
+      const { city } = parseSearchQuery(searchQuery)
+
+      if (city.length < 2) {
         setCitySuggestions([])
         return
       }
 
       try {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityQuery)}&format=json&limit=5&countrycodes=fr&addressdetails=1`,
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=5&countrycodes=fr&addressdetails=1`,
         )
         const data = await response.json()
         setCitySuggestions(data)
@@ -50,11 +112,11 @@ export function SearchBar({ onSearch, onCitySelect, isLoading }: SearchBarProps)
 
     const debounce = setTimeout(searchCities, 300)
     return () => clearTimeout(debounce)
-  }, [cityQuery])
+  }, [searchQuery])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (cityInputRef.current && !cityInputRef.current.contains(event.target as Node)) {
+      if (searchInputRef.current && !searchInputRef.current.contains(event.target as Node)) {
         setShowCitySuggestions(false)
       }
     }
@@ -64,154 +126,171 @@ export function SearchBar({ onSearch, onCitySelect, isLoading }: SearchBarProps)
   }, [])
 
   const handleCitySelect = (city: any) => {
-    const location = { lat: Number.parseFloat(city.lat), lon: Number.parseFloat(city.lon) }
-    setCityQuery(city.display_name.split(",")[0])
-    setShowCitySuggestions(false)
+    const { businessType } = parseSearchQuery(searchQuery)
+    const cityName = city.display_name.split(",")[0]
 
-    console.log("[v0] City selected, centering map:", city.display_name.split(",")[0], location)
-
-    // Call onCitySelect to center map only
-    if (onCitySelect) {
-      onCitySelect(city.display_name.split(",")[0], location)
+    // Reconstruct query with selected city
+    if (businessType) {
+      setSearchQuery(`${businessType} à ${cityName}`)
+    } else {
+      setSearchQuery(cityName)
     }
+
+    setShowCitySuggestions(false)
   }
 
-  const handleCityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      // If there are suggestions, select the first one
-      if (citySuggestions.length > 0) {
-        handleCitySelect(citySuggestions[0])
-      }
-    }
+  const toggleKeyword = (keyword: string) => {
+    setSelectedKeywords((prev) => (prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword]))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!cityQuery.trim()) {
+    if (!searchQuery.trim()) {
       return
     }
 
-    const selectedCity = citySuggestions.find((city) => city.display_name.split(",")[0] === cityQuery)
+    const { city, businessType } = parseSearchQuery(searchQuery)
+
+    if (!city) {
+      alert("Veuillez entrer au moins une ville dans votre recherche.")
+      return
+    }
+
+    // Find location from suggestions if available
+    const selectedCity = citySuggestions.find((c) =>
+      city.toLowerCase().includes(c.display_name.split(",")[0].toLowerCase()),
+    )
     const location = selectedCity
       ? { lat: Number.parseFloat(selectedCity.lat), lon: Number.parseFloat(selectedCity.lon) }
       : undefined
 
     const filters: SearchFilters = {
-      keywords: keywords.trim(),
+      keywords: selectedKeywords.join(" "),
+      useGrokEnrichment: false, // Will be prompted after scraping
     }
 
-    onSearch(cityQuery, businessType, filters, location)
+    onSearch(city, businessType, filters, location)
   }
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* City Input */}
-        <div className="space-y-2">
-          <Label htmlFor="city-input" className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            Ville
-          </Label>
-          <div ref={cityInputRef} className="relative">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 z-10" />
-            <Input
-              id="city-input"
-              type="text"
-              placeholder="Paris, Lyon, Marseille..."
-              value={cityQuery}
-              onChange={(e) => {
-                setCityQuery(e.target.value)
-                setShowCitySuggestions(true)
-              }}
-              onFocus={() => setShowCitySuggestions(true)}
-              onKeyDown={handleCityKeyDown}
-              disabled={isLoading}
-              className="pl-10 border-blue-200 dark:border-blue-800 focus:border-blue-500 focus:ring-blue-500"
-            />
-            {cityQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setCityQuery("")
-                  setCitySuggestions([])
-                }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <MapPin className="w-4 h-4" />
-              </button>
-            )}
-            {showCitySuggestions && citySuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-blue-200 dark:border-blue-800 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
-                {citySuggestions.map((city, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => handleCitySelect(city)}
-                    className="w-full text-left px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-sm border-b border-border last:border-b-0 transition-colors"
-                  >
-                    <div className="font-medium text-foreground">{city.display_name.split(",")[0]}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {city.display_name.split(",").slice(1, 3).join(",")}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Business Type Input */}
-        <div className="space-y-2">
-          <Label
-            htmlFor="business-type-input"
-            className="text-sm font-semibold text-foreground flex items-center gap-2"
-          >
-            <Search className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            Type de commerce <span className="text-muted-foreground font-normal">(optionnel)</span>
-          </Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 z-10" />
-            <Input
-              id="business-type-input"
-              type="text"
-              placeholder="café, restaurant, coiffeur..."
-              value={businessType}
-              onChange={(e) => setBusinessType(e.target.value)}
-              disabled={isLoading}
-              className="pl-10 border-blue-200 dark:border-blue-800 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Keywords Input */}
       <div className="space-y-2">
-        <Label htmlFor="keywords-input" className="text-sm font-semibold text-foreground">
-          Mots-clés <span className="text-muted-foreground font-normal">(optionnel)</span>
-        </Label>
-        <Input
-          id="keywords-input"
-          type="text"
-          placeholder="Filtrer par nom..."
-          value={keywords}
-          onChange={(e) => setKeywords(e.target.value)}
-          disabled={isLoading}
-          className="border-blue-200 dark:border-blue-800 focus:border-blue-500 focus:ring-blue-500"
-        />
+        <div ref={searchInputRef} className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 dark:text-blue-400 z-10" />
+          <Input
+            type="text"
+            placeholder="Ex: café à Paris, restaurant Lyon, coiffeur Marseille..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              setShowCitySuggestions(true)
+            }}
+            onFocus={() => setShowCitySuggestions(true)}
+            disabled={isLoading}
+            className="pl-12 pr-12 h-14 text-lg border-2 border-blue-200 dark:border-blue-800/50 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800/50 rounded-xl shadow-sm transition-all duration-200"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("")
+                setCitySuggestions([])
+                setSelectedKeywords([])
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+
+          {showCitySuggestions && citySuggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card dark:bg-gray-800 border border-blue-200 dark:border-blue-800/50 rounded-xl shadow-xl dark:shadow-gray-950/50 z-50 max-h-60 overflow-y-auto">
+              {citySuggestions.map((city, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleCitySelect(city)}
+                  className="w-full text-left px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-sm border-b border-border dark:border-gray-700/50 last:border-b-0 transition-colors duration-150"
+                >
+                  <div className="font-medium text-foreground">{city.display_name.split(",")[0]}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {city.display_name.split(",").slice(1, 3).join(",")}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <p className="text-xs text-muted-foreground px-1">
+          💡 Tapez votre recherche en langage naturel : "café à Paris", "restaurant Lyon", etc.
+        </p>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 pt-2">
-        <Button
-          onClick={handleSubmit}
-          disabled={isLoading || !cityQuery.trim()}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md hover:shadow-lg transition-all"
-        >
-          {isLoading ? <MapPin className="w-4 h-4 animate-spin" /> : "Rechercher"}
-        </Button>
-      </div>
+      {recommendedKeywords.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Sparkles className="w-4 h-4" />
+            <span>Mots-clés suggérés :</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recommendedKeywords.map((keyword) => (
+              <Badge
+                key={keyword}
+                variant={selectedKeywords.includes(keyword) ? "default" : "outline"}
+                className={`cursor-pointer transition-all duration-200 ${
+                  selectedKeywords.includes(keyword)
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                }`}
+                onClick={() => toggleKeyword(keyword)}
+              >
+                {keyword}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {selectedKeywords.length > 0 && (
+        <div className="flex flex-wrap gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800/50">
+          <span className="text-sm text-muted-foreground">Filtres actifs :</span>
+          {selectedKeywords.map((keyword) => (
+            <Badge
+              key={keyword}
+              variant="secondary"
+              className="gap-1 bg-blue-100 dark:bg-blue-900/40 text-blue-900 dark:text-blue-100"
+            >
+              {keyword}
+              <X className="w-3 h-3 cursor-pointer hover:text-blue-600" onClick={() => toggleKeyword(keyword)} />
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      <Button
+        onClick={handleSubmit}
+        disabled={isLoading || !searchQuery.trim()}
+        className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base font-medium"
+      >
+        {isLoading ? (
+          <>
+            <Search className="w-5 h-5 animate-spin mr-2" />
+            Recherche en cours...
+          </>
+        ) : (
+          <>
+            <Search className="w-5 h-5 mr-2" />
+            Rechercher
+          </>
+        )}
+      </Button>
+
+      <p className="text-xs text-center text-muted-foreground px-4">
+        <Sparkles className="w-3 h-3 inline mr-1" />
+        Après le scraping, vous pourrez enrichir les données avec Grok AI
+      </p>
     </div>
   )
 }

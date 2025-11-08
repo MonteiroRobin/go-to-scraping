@@ -1,175 +1,264 @@
-# Go To Scraping - Business Scraper
+# Local Business Scraper
 
-Application de scraping d'entreprises locales avec authentification sécurisée et interface de carte interactive.
+Une application Next.js puissante pour scraper et enrichir les données de commerces locaux via Google Places API et Grok AI.
 
-## 🚀 Démarrage rapide
+## 🚀 Fonctionnalités
 
-### Prérequis
+- **Scraping Google Places API** : Extraction de données complètes (nom, adresse, téléphone, site web, email, notes, avis)
+- **Détection des doublons** : Système intelligent pour éviter les doublons via Supabase
+- **Enrichissement Grok AI** : Ajout d'informations détaillées (descriptions, spécialités, horaires recommandés, etc.)
+- **Recherche intelligente** : Barre de recherche unique avec parsing en langage naturel
+- **Sélection par zone** : Dessin de zones personnalisées sur Google Maps
+- **Historique** : Sauvegarde automatique de toutes les recherches
+- **Export** : CSV et Google Sheets
+- **Mode sombre** : Interface adaptative avec thème clair/sombre
 
-- Node.js 18+
-- pnpm (gestionnaire de paquets)
-- Un compte Supabase (gratuit)
-- Une clé API Google Maps
+## 📋 Prérequis
 
-### Installation
+- Node.js 18+ et npm/pnpm
+- Compte Google Cloud Platform (pour Google Maps et Places API)
+- Compte Supabase (base de données)
+- Compte xAI (pour Grok AI - optionnel)
 
-1. **Cloner le projet**
-   ```bash
-   git clone https://github.com/MonteiroRobin/go-to-scraping.git
-   cd go-to-scraping
-   ```
+## 🛠️ Installation
 
-2. **Installer les dépendances**
-   ```bash
-   pnpm install
-   ```
+### 1. Cloner le projet depuis GitHub
 
-3. **Configurer les variables d'environnement**
+\`\`\`bash
+git clone https://github.com/votre-username/local-business-scraper.git
+cd local-business-scraper
+\`\`\`
 
-   Créez un fichier `.env.local` à la racine du projet :
+### 2. Installer les dépendances
 
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=votre-url-supabase
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=votre-cle-anon-supabase
-   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=votre-cle-google-maps
-   ```
+\`\`\`bash
+npm install
+# ou
+pnpm install
+\`\`\`
 
-4. **Lancer l'application en développement**
-   ```bash
-   pnpm dev
-   ```
+### 3. Configuration des variables d'environnement
 
-   L'application sera accessible sur [http://localhost:3000](http://localhost:3000)
+Créez un fichier `.env.local` à la racine du projet avec les variables suivantes :
 
----
+**Variables Google Maps (requises) :**
+\`\`\`bash
+# Pour l'affichage de la carte (variable publique)
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=votre_cle_api_google_maps
 
-## 🔑 Configuration des variables d'environnement
+# Pour les opérations serveur
+GOOGLE_MAPS_API_KEY=votre_cle_api_google_maps
+\`\`\`
 
-### 1. Supabase (Authentification)
+**Variable Google Places API (requise) :**
+\`\`\`bash
+PLACE_API_KEY=votre_cle_api_google_places
+\`\`\`
 
-#### Créer un compte Supabase (gratuit)
-👉 [https://supabase.com/dashboard](https://supabase.com/dashboard)
+**Variables Supabase (requises) :**
+\`\`\`bash
+SUPABASE_URL=https://votre-projet.supabase.co
+SUPABASE_ANON_KEY=votre_cle_anonyme_supabase
+\`\`\`
 
-#### Récupérer vos clés Supabase
-1. Créez un nouveau projet sur Supabase
-2. Allez dans **Settings** ⚙️ > **API**
-3. Copiez les valeurs suivantes :
-   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
-   - **anon public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+**Variable Grok AI (optionnelle) :**
+\`\`\`bash
+GROK_XAI_API_KEY=votre_cle_api_grok
+\`\`\`
 
-#### Créer un utilisateur dans Supabase
-1. Dans votre projet Supabase, allez dans **Authentication** > **Users**
-2. Cliquez sur **Add user** > **Create new user**
-3. Remplissez :
-   - **Email** : votre-email@example.com
-   - **Password** : votre-mot-de-passe-securise
-   - ✅ Cochez **Auto Confirm User**
-4. Cliquez sur **Create user**
+> **Note importante :** Utilisez exactement ces noms de variables. Les valeurs ci-dessus sont des exemples à remplacer par vos propres clés API.
 
-### 2. Google Maps API
+### 4. Configuration Google Cloud Platform
 
-#### Créer une clé API Google Maps
-👉 [https://console.cloud.google.com/](https://console.cloud.google.com/)
+#### a. Créer un projet Google Cloud
 
-1. Créez un nouveau projet (ou sélectionnez-en un existant)
-2. Allez dans **APIs & Services** > **Credentials**
-3. Cliquez sur **Create Credentials** > **API Key**
-4. Activez les APIs nécessaires :
-   - Maps JavaScript API
-   - Places API
-   - Geocoding API
+1. Allez sur [Google Cloud Console](https://console.cloud.google.com/)
+2. Créez un nouveau projet
+3. Activez la facturation (nécessaire pour les API)
 
-5. Copiez votre clé API → `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
+#### b. Activer les API nécessaires
 
-⚠️ **Important** : Configurez les restrictions de clé pour la sécurité (limitez aux domaines autorisés)
+Dans votre projet Google Cloud, activez :
+- **Places API (New)** - Pour le scraping des commerces
+- **Maps JavaScript API** - Pour l'affichage de la carte
+- **Geocoding API** - Pour la conversion adresse ↔ coordonnées
 
----
+#### c. Créer une clé API
+
+1. Allez dans "APIs & Services" > "Credentials"
+2. Cliquez sur "Create Credentials" > "API Key"
+3. Copiez la clé générée
+4. **Important** : Configurez les restrictions :
+   - Restrictions d'application : HTTP referrers (pour la clé publique)
+   - Ajoutez votre domaine : `http://localhost:3000/*` et `https://votre-domaine.com/*`
+   - Restrictions d'API : Sélectionnez uniquement les API nécessaires
+
+#### d. Quotas et tarification
+
+- **Places API (New)** : Gratuit jusqu'à 5 000 requêtes/mois, puis ~$17/1000 requêtes
+- **Maps JavaScript API** : Gratuit jusqu'à 28 000 chargements/mois
+- **Geocoding API** : Gratuit jusqu'à 40 000 requêtes/mois
+
+### 5. Configuration Supabase
+
+#### a. Créer un projet Supabase
+
+1. Allez sur [Supabase](https://supabase.com/)
+2. Créez un nouveau projet
+3. Notez l'URL du projet et la clé anonyme (anon key)
+
+#### b. Créer les tables
+
+Exécutez le script SQL disponible dans `scripts/setup_complete_database.sql` dans l'éditeur SQL de Supabase.
+
+Le script crée :
+- Table `search_history` : Historique des recherches
+- Table `search_results` : Résultats détaillés (optionnel)
+- Table `scraped_businesses` : Commerces scrapés avec détection des doublons
+- Index pour améliorer les performances
+- Politiques RLS (Row Level Security)
+- Triggers automatiques
+
+### 6. Configuration Grok AI (optionnel)
+
+1. Créez un compte sur [xAI](https://x.ai/)
+2. Générez une clé API
+3. Ajoutez-la dans `.env.local`
+
+## 🚀 Lancement
+
+### Développement local
+
+\`\`\`bash
+npm run dev
+# ou
+pnpm dev
+\`\`\`
+
+L'application sera accessible sur [http://localhost:3000](http://localhost:3000)
+
+### Production
+
+\`\`\`bash
+npm run build
+npm start
+\`\`\`
 
 ## 📦 Déploiement sur Vercel
 
-### 1. Connecter le projet à Vercel
+### 1. Push sur GitHub
 
-👉 [https://vercel.com/new](https://vercel.com/new)
+\`\`\`bash
+git add .
+git commit -m "Initial commit"
+git push origin main
+\`\`\`
 
-1. Importez votre repository GitHub
-2. Vercel détectera automatiquement Next.js
+### 2. Déployer sur Vercel
 
-### 2. Configurer les variables d'environnement sur Vercel
+1. Allez sur [Vercel](https://vercel.com/)
+2. Cliquez sur "New Project"
+3. Importez votre repository GitHub
+4. Ajoutez les variables d'environnement dans les paramètres du projet
+5. Cliquez sur "Deploy"
 
-Dans votre projet Vercel :
-1. Allez dans **Settings** > **Environment Variables**
-2. Ajoutez les trois variables suivantes :
+### 3. Configurer les variables d'environnement sur Vercel
 
-| Nom | Valeur | Environnement |
-|-----|--------|---------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Votre URL Supabase | Production, Preview, Development |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Votre clé anon Supabase | Production, Preview, Development |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Votre clé Google Maps | Production, Preview, Development |
+Dans les paramètres du projet Vercel, ajoutez toutes les variables d'environnement listées dans la section 3 ci-dessus.
 
-3. Cliquez sur **Save**
-4. Redéployez l'application
+## 📖 Utilisation
 
----
+### Recherche par ville
 
-## 🛠️ Technologies utilisées
+1. Entrez une requête en langage naturel : "café à Paris" ou "restaurant Lyon"
+2. Cliquez sur "Rechercher"
+3. Les résultats s'affichent avec détection automatique des doublons
 
-- **Framework** : Next.js 16 (App Router)
-- **UI** : React 19, TailwindCSS 4, Radix UI, shadcn/ui
-- **Authentification** : Supabase Auth
-- **Base de données** : Supabase
-- **Cartes** : Google Maps API
-- **Déploiement** : Vercel
+### Recherche par zone
 
----
+1. Allez dans l'onglet "Carte"
+2. Utilisez les outils de dessin pour sélectionner une zone
+3. Cliquez sur "Confirmer la zone"
 
-## 📂 Structure du projet
+### Enrichissement Grok AI
 
-```
-go-to-scraping/
+Après chaque scraping, un prompt apparaît pour enrichir les données avec Grok AI :
+- Descriptions détaillées
+- Informations de contact manquantes
+- Meilleurs moments pour visiter
+- Informations pratiques (parking, accessibilité, etc.)
+
+### Export des données
+
+- **CSV** : Téléchargement direct au format CSV
+- **Google Sheets** : Copie formatée pour coller directement dans Sheets
+- **Copie de ligne** : Bouton pour copier chaque ligne individuellement
+
+## 🔧 Technologies utilisées
+
+- **Next.js 16** - Framework React avec App Router
+- **TypeScript** - Typage statique
+- **Tailwind CSS v4** - Styling
+- **shadcn/ui** - Composants UI
+- **Supabase** - Base de données PostgreSQL
+- **Google Maps API** - Affichage de carte et géolocalisation
+- **Google Places API (New)** - Scraping de commerces
+- **Grok AI (xAI)** - Enrichissement des données
+- **SWR** - Gestion du cache et des requêtes
+
+## 📝 Structure du projet
+
+\`\`\`
+local-business-scraper/
 ├── app/
 │   ├── api/
-│   │   └── maps-config/      # Configuration Google Maps
-│   ├── login/                 # Page de connexion
-│   ├── scraper/              # Interface de scraping
-│   ├── layout.tsx            # Layout principal
-│   └── page.tsx              # Page d'accueil
+│   │   ├── enrich-with-grok/    # Enrichissement Grok AI
+│   │   ├── maps-config/         # Configuration Google Maps
+│   │   └── scrape-places/       # Scraping Google Places
+│   ├── scraper/                 # Page principale
+│   └── login/                   # Authentification
 ├── components/
-│   ├── ui/                   # Composants UI (shadcn)
-│   ├── map-component.tsx     # Composant carte
-│   ├── results-list.tsx      # Liste de résultats
-│   └── scraper-interface.tsx # Interface de scraping
+│   ├── scraper-interface.tsx    # Interface principale
+│   ├── search-bar.tsx           # Barre de recherche
+│   ├── results-list.tsx         # Affichage des résultats
+│   ├── history-view.tsx         # Historique des recherches
+│   ├── map-component.tsx        # Carte Google Maps
+│   └── database-test.tsx        # Test de connexion Supabase
 ├── lib/
-│   ├── supabase.ts           # Client Supabase
-│   ├── auth-context.tsx      # Context d'authentification
-│   └── utils.ts              # Utilitaires
-└── .env.local                # Variables d'environnement (à créer)
-```
+│   ├── supabase.ts              # Client Supabase
+│   └── auth-context.tsx         # Contexte d'authentification
+└── scripts/
+    └── setup_complete_database.sql  # Script SQL complet
+\`\`\`
 
----
+## 🐛 Dépannage
 
-## 🔐 Sécurité
+### Erreur "REQUEST_DENIED" Google Places API
 
-- Les mots de passe sont gérés par Supabase (hashés et sécurisés)
-- Les clés API ne sont jamais exposées dans le code
-- Authentification requise pour accéder au scraper
-- Sessions gérées automatiquement par Supabase Auth
+- Vérifiez que "Places API (New)" est activée dans Google Cloud Console
+- Vérifiez que votre clé API a les bonnes restrictions
+- Vérifiez que la facturation est activée sur votre projet Google Cloud
 
----
+### Erreur de connexion Supabase
 
-## 📝 License
+- Vérifiez que les variables d'environnement Supabase sont correctes
+- Vérifiez que les tables ont été créées avec le script SQL
+- Utilisez le composant DatabaseTest pour diagnostiquer les problèmes
 
-Ce projet est sous licence privée. Contactez l'auteur pour toute utilisation commerciale.
+### Pas de résultats de scraping
 
----
+- Vérifiez que la limite de 100 résultats n'est pas atteinte
+- Essayez une zone plus grande ou une recherche différente
+- Vérifiez les logs de la console pour les erreurs
 
-## 🤝 Support
+## 📄 Licence
 
-Pour toute question ou problème :
-- Ouvrez une issue sur GitHub
-- Contactez : robinm@go-to-agency.com
+MIT
 
----
+## 🤝 Contribution
 
-## ✨ Crédits
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
 
-Développé par **Go To Agency**
+## 📧 Support
+
+Pour toute question ou problème, ouvrez une issue sur GitHub.

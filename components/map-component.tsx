@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react"
 import { Square, RotateCcw, Check, Locate } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
-import { showErrorToast, showSuccessToast } from "@/lib/toast-utils"
 
 declare global {
   interface Window {
@@ -205,9 +204,8 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
           return
         }
 
-        // Lazy load Google Maps script
         const script = document.createElement("script")
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing&v=weekly&loading=async`
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing&v=weekly`
         script.async = true
         script.defer = true
 
@@ -228,12 +226,7 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
       }
     }
 
-    // Delay loading slightly to prioritize initial render
-    const timer = setTimeout(() => {
-      loadGoogleMaps()
-    }, 100)
-
-    return () => clearTimeout(timer)
+    loadGoogleMaps()
   }, []) // Removed apiKey dependency
 
   useEffect(() => {
@@ -280,10 +273,10 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
         drawingMode: null,
         drawingControl: false,
         rectangleOptions: {
-          fillColor: "#3b82f6",
-          fillOpacity: 0.15,
+          fillColor: theme === "dark" ? "#C4B896" : "#4A90E2",
+          fillOpacity: 0.1,
           strokeWeight: 2,
-          strokeColor: "#3b82f6",
+          strokeColor: theme === "dark" ? "#C4B896" : "#4A90E2",
           clickable: false,
           editable: false,
           zIndex: 1,
@@ -422,7 +415,7 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
 
   const handleLocateMe = () => {
     if (!navigator.geolocation || !mapInstanceRef.current) {
-      showErrorToast("Géolocalisation indisponible", "Votre navigateur ne supporte pas la géolocalisation")
+      alert("La géolocalisation n'est pas disponible sur votre navigateur")
       return
     }
 
@@ -435,11 +428,10 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
         console.log("[v0] Centering on user location:", userLocation)
         mapInstanceRef.current?.setCenter(userLocation)
         mapInstanceRef.current?.setZoom(14)
-        showSuccessToast("Position trouvée!", "La carte est centrée sur votre position")
       },
       (error) => {
         console.error("[v0] Geolocation error:", error)
-        showErrorToast("Impossible de vous localiser", "Vérifiez les autorisations de localisation dans votre navigateur")
+        alert("Impossible d'obtenir votre position. Vérifiez les autorisations de localisation.")
       },
     )
   }
@@ -476,7 +468,6 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
           disabled={!isMapReady}
           className="bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6"
           title="Me localiser"
-          aria-label="Centrer la carte sur ma position actuelle"
         >
           <Locate className="w-5 h-5" />
           <span>Me localiser</span>
@@ -484,7 +475,6 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
 
         {/* Rectangle Selection Tool */}
         <Button
-          id="map-zone-button"
           size="lg"
           onClick={toggleSelectionMode}
           disabled={!isMapReady}
@@ -494,7 +484,6 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
               : "bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6"
           }
           title="Outil de sélection rectangle"
-          aria-label="Activer l'outil de sélection de zone sur la carte"
         >
           <Square className="w-5 h-5" />
           <span>{selectionMode ? "Sélection active" : "Sélectionner zone"}</span>
@@ -507,7 +496,6 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
           disabled={!hasRectangle}
           className="bg-white dark:bg-gray-900 hover:bg-orange-50 dark:hover:bg-gray-800 text-orange-600 dark:text-orange-400 border-2 border-orange-200 dark:border-orange-900 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
           title="Réinitialiser la sélection"
-          aria-label="Réinitialiser la zone sélectionnée"
         >
           <RotateCcw className="w-5 h-5" />
           <span>Réinitialiser</span>
@@ -520,7 +508,6 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
           disabled={!hasRectangle}
           className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white border-2 border-green-400 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
           title="Confirmer la zone"
-          aria-label="Confirmer la zone sélectionnée et lancer la recherche"
         >
           <Check className="w-5 h-5" />
           <span>Confirmer</span>
