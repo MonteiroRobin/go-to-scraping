@@ -48,7 +48,7 @@ export default function HomePage() {
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <MapPin className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
-            <span className="text-xl font-semibold text-foreground">LocalScraper</span>
+            <span className="text-xl font-semibold text-foreground">Go To Scraping</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -158,7 +158,7 @@ export default function HomePage() {
             </div>
             <h2 className="text-3xl font-bold text-foreground">Accès anticipé disponible</h2>
             <p className="text-lg text-muted-foreground">
-              Rejoignez la liste d'attente pour être parmi les premiers à utiliser LocalScraper
+              Rejoignez la liste d'attente pour être parmi les premiers à utiliser Go To Scraping
             </p>
           </div>
         </section>
@@ -166,7 +166,7 @@ export default function HomePage() {
 
       <footer className="border-t border-border mt-12">
         <div className="max-w-6xl mx-auto px-6 py-8 text-center text-sm text-muted-foreground">
-          © 2025 LocalScraper - Go To Agency. Tous droits réservés.
+          © 2025 Go To Scraping - Go To Agency. Tous droits réservés.
         </div>
       </footer>
     </div>
