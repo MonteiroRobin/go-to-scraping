@@ -1,20 +1,18 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { MapPin, Search, Download, Zap, Check, BookOpen, ArrowRight } from "lucide-react"
+import { MapPin, Search, Download, Zap, Check, BookOpen, ArrowRight, Sparkles, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
-import { AnimatedText, GlitchText } from "@/components/AnimatedText"
+import { AnimatedText } from "@/components/AnimatedText"
 import { FloatingDots } from "@/components/InteractiveGrid"
 import { ScrollProgress } from "@/components/ScrollProgress"
 import { OrganizationJsonLd, SoftwareApplicationJsonLd } from "@/components/BlogJsonLd"
-import { HeroIllustration } from "@/components/HeroIllustration"
 import { CustomCursor } from "@/components/CustomCursor"
 import { MagneticButton } from "@/components/MagneticButton"
 import { GradientText, ShimmerText } from "@/components/GradientText"
@@ -92,62 +90,81 @@ export default function HomePage() {
       </nav>
 
       <main className="max-w-6xl mx-auto px-6">
-        <section className="py-20 text-center">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              Bêta privée - Accès limité
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-balance">
-              <GradientText className="block mb-2">
-                <AnimatedText text="Scrapez les commerces" />
-              </GradientText>
-              <GradientText className="block">
-                <AnimatedText text="locaux en quelques clics" />
-              </GradientText>
-            </h1>
-
-            <p className="text-xl text-muted-foreground leading-relaxed text-pretty">
-              Sélectionnez une zone sur la carte, récupérez instantanément les données de tous les commerces locaux, et
-              exportez-les en CSV ou Google Sheets.
-            </p>
-
-            {!isSubmitted ? (
-              <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto pt-4">
-                <div className="flex gap-3">
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    required
-                    className="flex-1 h-12"
-                  />
-                  <MagneticButton
-                    type="submit"
-                    disabled={isLoading}
-                    size="lg"
-                    className="h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    {isLoading ? "..." : "Rejoindre la liste"}
-                  </MagneticButton>
-                </div>
-                <p className="text-sm text-muted-foreground mt-3">
-                  Inscrivez-vous pour être notifié lors de l'ouverture publique
-                </p>
-              </form>
-            ) : (
-              <div className="max-w-md mx-auto pt-4 space-y-4">
-                <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-primary/10 text-primary">
-                  <Check className="w-5 h-5" />
-                  <span className="font-medium">Vous êtes sur la liste d'attente !</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Nous vous contacterons dès que l'accès sera ouvert au public.
-                </p>
+        <section className="py-20 text-center relative">
+          <RevealOnScroll>
+            <div className="max-w-4xl mx-auto space-y-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium animate-pulse">
+                <Sparkles className="w-4 h-4" />
+                <span className="font-semibold">Bêta privée - Accès limité</span>
               </div>
-            )}
+
+              <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.1] text-balance">
+                <span className="block mb-4">
+                  <GradientText animated>Transformez Google Maps</GradientText>
+                </span>
+                <span className="block">
+                  <ShimmerText className="text-foreground">en machine à leads</ShimmerText>
+                </span>
+              </h1>
+
+              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+                <span className="font-semibold text-foreground">Des milliers de contacts qualifiés</span> en quelques clics.
+                Sélectionnez une zone, scrapez, exportez. Simple. Puissant. Automatique.
+              </p>
+
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground pt-4">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-primary" />
+                  <span>Sans code</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-primary" />
+                  <span>Données en temps réel</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-primary" />
+                  <span>Export instantané</span>
+                </div>
+              </div>
+
+              {!isSubmitted ? (
+                <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto pt-8">
+                  <div className="flex gap-3">
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="votre@email.com"
+                      required
+                      className="flex-1 h-14 text-lg border-2 focus:border-primary"
+                    />
+                    <MagneticButton
+                      type="submit"
+                      disabled={isLoading}
+                      size="lg"
+                      className="h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-semibold"
+                    >
+                      {isLoading ? "..." : "Démarrer →"}
+                    </MagneticButton>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4 flex items-center justify-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Rejoignez +500 utilisateurs en liste d'attente</span>
+                  </p>
+                </form>
+              ) : (
+                <div className="max-w-md mx-auto pt-8 space-y-4">
+                  <div className="flex items-center justify-center gap-3 p-6 rounded-xl bg-primary/10 text-primary border-2 border-primary/20">
+                    <Check className="w-6 h-6" />
+                    <span className="font-semibold text-lg">Vous êtes inscrit !</span>
+                  </div>
+                  <p className="text-muted-foreground">
+                    Nous vous contacterons dès que l'accès sera ouvert au public.
+                  </p>
+                </div>
+              )}
+            </div>
+          </RevealOnScroll>
           </div>
         </section>
 
