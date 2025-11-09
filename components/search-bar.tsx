@@ -177,7 +177,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
     <div className="space-y-4">
       <div className="space-y-2">
         <div ref={searchInputRef} className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 dark:text-blue-400 z-10" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary z-10" />
           <Input
             type="text"
             placeholder="Ex: café à Paris, restaurant Lyon, coiffeur Marseille..."
@@ -188,7 +188,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
             }}
             onFocus={() => setShowCitySuggestions(true)}
             disabled={isLoading}
-            className="pl-12 pr-12 h-14 text-lg border-2 border-blue-200 dark:border-blue-800/50 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800/50 rounded-xl shadow-sm transition-all duration-200"
+            className="pl-12 pr-12 h-14 text-lg border border-border focus:border-primary focus:ring-primary bg-white dark:bg-card rounded-xl shadow-sm transition-all duration-200"
           />
           {searchQuery && (
             <button
@@ -205,13 +205,13 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
           )}
 
           {showCitySuggestions && citySuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card dark:bg-gray-800 border border-blue-200 dark:border-blue-800/50 rounded-xl shadow-xl dark:shadow-gray-950/50 z-50 max-h-60 overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-card border border-border rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
               {citySuggestions.map((city, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => handleCitySelect(city)}
-                  className="w-full text-left px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-sm border-b border-border dark:border-gray-700/50 last:border-b-0 transition-colors duration-150"
+                  className="w-full text-left px-4 py-3 hover:bg-secondary text-sm border-b border-border last:border-b-0 transition-colors duration-150"
                 >
                   <div className="font-medium text-foreground">{city.display_name.split(",")[0]}</div>
                   <div className="text-xs text-muted-foreground">
@@ -241,8 +241,8 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
                 variant={selectedKeywords.includes(keyword) ? "default" : "outline"}
                 className={`cursor-pointer transition-all duration-200 ${
                   selectedKeywords.includes(keyword)
-                    ? "bg-blue-600 hover:bg-blue-700 text-white"
-                    : "hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                    : "hover:bg-secondary"
                 }`}
                 onClick={() => toggleKeyword(keyword)}
               >
@@ -254,16 +254,16 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
       )}
 
       {selectedKeywords.length > 0 && (
-        <div className="flex flex-wrap gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800/50">
+        <div className="flex flex-wrap gap-2 p-3 bg-secondary rounded-lg border border-border">
           <span className="text-sm text-muted-foreground">Filtres actifs :</span>
           {selectedKeywords.map((keyword) => (
             <Badge
               key={keyword}
               variant="secondary"
-              className="gap-1 bg-blue-100 dark:bg-blue-900/40 text-blue-900 dark:text-blue-100"
+              className="gap-1 bg-white dark:bg-card text-foreground border border-border"
             >
               {keyword}
-              <X className="w-3 h-3 cursor-pointer hover:text-blue-600" onClick={() => toggleKeyword(keyword)} />
+              <X className="w-3 h-3 cursor-pointer hover:text-primary" onClick={() => toggleKeyword(keyword)} />
             </Badge>
           ))}
         </div>
@@ -272,7 +272,7 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
       <Button
         onClick={handleSubmit}
         disabled={isLoading || !searchQuery.trim()}
-        className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base font-medium"
+        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base font-medium"
       >
         {isLoading ? (
           <>

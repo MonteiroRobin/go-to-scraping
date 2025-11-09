@@ -82,13 +82,13 @@ export function ScraperInterface() {
 
     return (
       <div className="mt-6 space-y-4">
-        <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-xl border border-blue-200 dark:border-blue-700/50 shadow-lg dark:shadow-blue-900/20 transition-all duration-300">
+        <div className="flex items-center justify-between p-6 bg-white dark:bg-card rounded-2xl border border-border shadow-lg transition-all duration-300">
           <div className="flex items-center gap-6">
             <div>
-              <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
+              <div className="text-4xl font-bold text-foreground">
                 {results.length}
               </div>
-              <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+              <div className="text-sm text-muted-foreground font-medium">
                 {results.length === 1 ? "commerce trouvé" : "commerces trouvés"}
               </div>
             </div>
@@ -96,15 +96,15 @@ export function ScraperInterface() {
             {(newCount > 0 || duplicateCount > 0) && (
               <div className="flex gap-4">
                 {newCount > 0 && (
-                  <div className="px-4 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-300 dark:border-green-700/50">
-                    <div className="text-2xl font-bold text-green-700 dark:text-green-300">{newCount}</div>
-                    <div className="text-xs text-green-600 dark:text-green-400">nouveaux</div>
+                  <div className="px-4 py-2 bg-secondary rounded-lg border border-border">
+                    <div className="text-2xl font-bold text-foreground">{newCount}</div>
+                    <div className="text-xs text-muted-foreground">nouveaux</div>
                   </div>
                 )}
                 {duplicateCount > 0 && (
-                  <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg border border-orange-300 dark:border-orange-700/50">
-                    <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">{duplicateCount}</div>
-                    <div className="text-xs text-orange-600 dark:text-orange-400">déjà scrapés</div>
+                  <div className="px-4 py-2 bg-secondary rounded-lg border border-border">
+                    <div className="text-2xl font-bold text-foreground">{duplicateCount}</div>
+                    <div className="text-xs text-muted-foreground">déjà scrapés</div>
                   </div>
                 )}
               </div>
@@ -113,16 +113,16 @@ export function ScraperInterface() {
             {isEnriching && enrichmentProgress.total > 0 && (
               <div className="flex-1 min-w-[200px]">
                 <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="text-purple-700 dark:text-purple-300 font-medium">
+                  <span className="text-foreground font-medium">
                     Enrichissement Grok {enrichmentProgress.current}/{enrichmentProgress.total}
                   </span>
-                  <span className="text-purple-600 dark:text-purple-400 font-semibold">
+                  <span className="text-muted-foreground font-semibold">
                     {Math.round((enrichmentProgress.current / enrichmentProgress.total) * 100)}%
                   </span>
                 </div>
                 <Progress
                   value={(enrichmentProgress.current / enrichmentProgress.total) * 100}
-                  className="h-2.5 bg-purple-100 dark:bg-purple-950/50"
+                  className="h-2.5 bg-secondary"
                 />
               </div>
             )}
@@ -130,16 +130,16 @@ export function ScraperInterface() {
             {isLoading && progress.total > 0 && !isEnriching && (
               <div className="flex-1 min-w-[200px]">
                 <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="text-blue-700 dark:text-blue-300 font-medium">
+                  <span className="text-foreground font-medium">
                     Scraping {progress.current}/{progress.total}
                   </span>
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                  <span className="text-muted-foreground font-semibold">
                     {Math.round((progress.current / progress.total) * 100)}%
                   </span>
                 </div>
                 <Progress
                   value={(progress.current / progress.total) * 100}
-                  className="h-2.5 bg-blue-100 dark:bg-blue-950/50"
+                  className="h-2.5 bg-secondary"
                 />
               </div>
             )}
@@ -147,9 +147,9 @@ export function ScraperInterface() {
         </div>
 
         {duplicateCount > 0 && (
-          <Alert className="border-orange-300 dark:border-orange-700/50 bg-orange-50 dark:bg-orange-900/20">
-            <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-            <AlertDescription className="text-orange-800 dark:text-orange-200">
+          <Alert className="border-border bg-secondary">
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            <AlertDescription className="text-foreground">
               {duplicateCount} {duplicateCount === 1 ? "établissement a" : "établissements ont"} déjà été scrapé
               {duplicateCount > 1 ? "s" : ""} précédemment. Les données ont été mises à jour.
             </AlertDescription>
@@ -830,18 +830,18 @@ export function ScraperInterface() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950/10 transition-colors duration-300">
-      <header className="sticky top-0 z-50 border-b border-border/40 dark:border-border/20 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-sm dark:shadow-gray-950/50 transition-all duration-300">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-300">
+      <header className="sticky top-0 z-50 border-b border-border backdrop-blur-md bg-white/60 dark:bg-black/60 transition-all duration-300">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent">
-                Business Scraper
+              <h1 className="text-2xl font-semibold text-foreground">
+                Go To Scraping
               </h1>
               {user && (
-                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-950/40 rounded-full border border-blue-200 dark:border-blue-800/50 transition-colors duration-300">
-                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse shadow-lg shadow-blue-500/50" />
-                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">{user.name}</span>
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-border transition-colors duration-300">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
+                  <span className="text-sm font-medium text-foreground">{user.name}</span>
                 </div>
               )}
             </div>
@@ -852,7 +852,7 @@ export function ScraperInterface() {
                 onClick={logout}
                 variant="ghost"
                 size="sm"
-                className="gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-foreground transition-colors duration-200"
+                className="gap-2 text-foreground transition-colors duration-200"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Déconnexion</span>
@@ -864,11 +864,7 @@ export function ScraperInterface() {
             <Button
               onClick={() => setViewMode("search")}
               variant={viewMode === "search" ? "default" : "ghost"}
-              className={`flex-1 gap-2 transition-all duration-200 ${
-                viewMode === "search"
-                  ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md dark:shadow-blue-900/30"
-                  : "hover:bg-blue-50 dark:hover:bg-blue-950/30 text-foreground"
-              }`}
+              className="flex-1 gap-2 transition-all duration-200"
             >
               <Search className="w-4 h-4" />
               Recherche
@@ -876,11 +872,7 @@ export function ScraperInterface() {
             <Button
               onClick={() => setViewMode("map")}
               variant={viewMode === "map" ? "default" : "ghost"}
-              className={`flex-1 gap-2 transition-all duration-200 ${
-                viewMode === "map"
-                  ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md dark:shadow-blue-900/30"
-                  : "hover:bg-blue-50 dark:hover:bg-blue-950/30 text-foreground"
-              }`}
+              className="flex-1 gap-2 transition-all duration-200"
             >
               <Map className="w-4 h-4" />
               Carte
@@ -888,11 +880,7 @@ export function ScraperInterface() {
             <Button
               onClick={() => setViewMode("history")}
               variant={viewMode === "history" ? "default" : "ghost"}
-              className={`flex-1 gap-2 transition-all duration-200 ${
-                viewMode === "history"
-                  ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md dark:shadow-blue-900/30"
-                  : "hover:bg-blue-50 dark:hover:bg-blue-950/30 text-foreground"
-              }`}
+              className="flex-1 gap-2 transition-all duration-200"
             >
               <History className="w-4 h-4" />
               Historique
@@ -912,7 +900,7 @@ export function ScraperInterface() {
         </div>
       ) : viewMode === "search" ? (
         <>
-          <div className="border-b border-border/40 dark:border-border/20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm dark:shadow-gray-950/30 transition-all duration-300">
+          <div className="border-b border-border bg-white/80 dark:bg-black/80 backdrop-blur-sm shadow-sm transition-all duration-300">
             <div className="container mx-auto px-4 py-6">
               <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
 
@@ -920,10 +908,10 @@ export function ScraperInterface() {
                 <Button
                   variant="outline"
                   onClick={() => setShowExplanation(!showExplanation)}
-                  className="w-full justify-between border-blue-200 dark:border-blue-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 bg-white dark:bg-gray-800/50 transition-all duration-200"
+                  className="w-full justify-between transition-all duration-200"
                 >
                   <span className="flex items-center gap-2">
-                    <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <Info className="w-4 h-4 text-primary" />
                     <span className="font-medium text-foreground">Comment fonctionne le scraping ?</span>
                   </span>
                   {showExplanation ? (
@@ -934,10 +922,10 @@ export function ScraperInterface() {
                 </Button>
 
                 {showExplanation && (
-                  <div className="mt-4 p-6 bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800/80 dark:to-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800/50 shadow-lg dark:shadow-blue-950/20 space-y-4 transition-all duration-300">
+                  <div className="mt-4 p-6 bg-white dark:bg-card rounded-xl border border-border shadow-lg space-y-4 transition-all duration-300">
                     <div>
                       <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                        <div className="w-2 h-2 bg-primary rounded-full" />
                         Source des données : Google Places API
                       </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
@@ -950,7 +938,7 @@ export function ScraperInterface() {
 
                     <div>
                       <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full" />
+                        <div className="w-2 h-2 bg-primary rounded-full" />
                         Détection des doublons
                       </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
@@ -962,7 +950,7 @@ export function ScraperInterface() {
 
                     <div>
                       <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                        <div className="w-2 h-2 bg-primary rounded-full" />
                         Limite de 100 résultats
                       </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
@@ -972,7 +960,7 @@ export function ScraperInterface() {
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-blue-200 dark:border-blue-800/50">
+                    <div className="pt-4 border-t border-border">
                       <p className="text-xs text-muted-foreground">
                         💡 <span className="font-medium">Astuce</span> : Les données Google Places sont généralement
                         plus complètes et à jour que celles d'OpenStreetMap, avec des informations de contact fiables et
@@ -986,19 +974,19 @@ export function ScraperInterface() {
               {statsDisplay}
 
               {showGrokPrompt && canEnrich && !isEnriching && (
-                <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-700/30 rounded-xl border-2 border-gray-300 dark:border-gray-600/50 shadow-lg dark:shadow-gray-900/20">
+                <div className="mt-6 p-6 bg-secondary rounded-xl border border-border shadow-lg">
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center">
-                      <Sparkles className="w-6 h-6 text-white" />
+                    <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-primary-foreground" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
                         Enrichir avec Grok AI ?
                       </h3>
-                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                      <p className="text-sm text-muted-foreground mb-2">
                         Grok AI peut analyser et enrichir vos {results.length} résultats avec :
                       </p>
-                      <ul className="text-sm text-gray-600 dark:text-gray-400 mb-4 space-y-1 ml-4">
+                      <ul className="text-sm text-muted-foreground mb-4 space-y-1 ml-4">
                         <li>• Descriptions détaillées et points forts uniques</li>
                         <li>• Informations de contact manquantes (téléphone, email, site web)</li>
                         <li>• Meilleurs moments pour visiter et public cible</li>
@@ -1008,7 +996,7 @@ export function ScraperInterface() {
                       <div className="flex gap-3">
                         <Button
                           onClick={handleEnrichWithGrok}
-                          className="bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 text-white shadow-md"
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
                         >
                           <Sparkles className="w-4 h-4 mr-2" />
                           Enrichir maintenant
@@ -1016,7 +1004,6 @@ export function ScraperInterface() {
                         <Button
                           onClick={() => setShowGrokPrompt(false)}
                           variant="outline"
-                          className="border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                         >
                           Plus tard
                         </Button>
@@ -1029,11 +1016,11 @@ export function ScraperInterface() {
           </div>
 
           {(isLoading || isEnriching) && (
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 border-b border-blue-200 dark:border-blue-800/50 transition-all duration-300">
+            <div className="bg-secondary border-b border-border transition-all duration-300">
               <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center gap-3">
-                  <Loader2 className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400" />
-                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="text-sm font-medium text-foreground">
                     {isEnriching
                       ? "Enrichissement des données avec Grok AI..."
                       : "Scraping avec Google Places API en cours..."}
@@ -1042,23 +1029,23 @@ export function ScraperInterface() {
                 {isEnriching && enrichmentProgress.total > 0 && (
                   <div className="mt-4">
                     <div className="flex items-center justify-between text-xs mb-2">
-                      <span className="text-gray-700 dark:text-gray-300 font-medium">
+                      <span className="text-foreground font-medium">
                         Enrichissement Grok {enrichmentProgress.current}/{enrichmentProgress.total}
                       </span>
-                      <span className="text-gray-900 dark:text-gray-100 font-semibold">
+                      <span className="text-muted-foreground font-semibold">
                         {Math.round((enrichmentProgress.current / enrichmentProgress.total) * 100)}%
                       </span>
                     </div>
                     <Progress
                       value={(enrichmentProgress.current / enrichmentProgress.total) * 100}
-                      className="h-2.5 bg-gray-200 dark:bg-gray-700"
+                      className="h-2.5 bg-secondary"
                     />
                   </div>
                 )}
                 {isLoading && progress.total > 0 && !isEnriching && (
                   <Progress
                     value={(progress.current / progress.total) * 100}
-                    className="mt-4 h-2.5 bg-blue-100 dark:bg-blue-950/50"
+                    className="mt-4 h-2.5 bg-secondary"
                   />
                 )}
               </div>
@@ -1067,13 +1054,13 @@ export function ScraperInterface() {
 
           <div className="container mx-auto px-4 py-8">
             {results.length === 0 && !isLoading && (
-              <div className="text-center p-12 bg-gradient-to-br from-blue-50/50 to-white dark:from-blue-950/20 dark:to-gray-800/50 rounded-2xl border border-dashed border-blue-300 dark:border-blue-800/50 shadow-sm dark:shadow-blue-900/10 transition-all duration-300">
+              <div className="text-center p-12 bg-white dark:bg-card rounded-2xl border border-dashed border-border shadow-sm transition-all duration-300">
                 <div className="max-w-md mx-auto space-y-3">
-                  <div className="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-950/40 rounded-full flex items-center justify-center transition-colors duration-300">
-                    <Search className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center transition-colors duration-300">
+                    <Search className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="text-blue-900 dark:text-blue-200 font-medium">Commencez votre recherche</p>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className="text-foreground font-medium">Commencez votre recherche</p>
+                  <p className="text-sm text-muted-foreground">
                     Entrez une ville et un type de commerce, puis cliquez sur "Rechercher"
                   </p>
                 </div>
@@ -1081,7 +1068,7 @@ export function ScraperInterface() {
             )}
 
             {results.length > 0 && (
-              <div className="rounded-2xl overflow-hidden border border-border/40 dark:border-border/20 shadow-xl dark:shadow-gray-950/50 bg-white dark:bg-gray-800/50 transition-all duration-300">
+              <div className="rounded-2xl overflow-hidden border border-border shadow-xl bg-white dark:bg-card transition-all duration-300">
                 <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
               </div>
             )}
@@ -1091,7 +1078,7 @@ export function ScraperInterface() {
         <>
           {/* Map View */}
           <div className="container mx-auto px-4 py-8">
-            <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50 shadow-lg dark:shadow-blue-900/20 transition-all duration-300">
+            <div className="mb-6 p-6 bg-white dark:bg-card rounded-xl border border-border shadow-lg transition-all duration-300">
               <h2 className="text-lg font-semibold text-foreground mb-2">Sélection par zone</h2>
               <p className="text-sm text-muted-foreground">
                 Utilisez les outils de dessin pour sélectionner une zone sur la carte, puis cliquez sur "Confirmer" pour
@@ -1100,7 +1087,7 @@ export function ScraperInterface() {
             </div>
 
             <div
-              className="rounded-2xl overflow-hidden border border-border/40 dark:border-border/20 shadow-2xl dark:shadow-gray-950/50 transition-all duration-300"
+              className="rounded-2xl overflow-hidden border border-border shadow-2xl transition-all duration-300"
               style={{ height: "700px" }}
             >
               <MapComponent
@@ -1112,24 +1099,24 @@ export function ScraperInterface() {
             </div>
 
             {isLoading && (
-              <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50">
+              <div className="mt-6 p-6 bg-secondary rounded-xl border border-border">
                 <div className="flex items-center gap-3 mb-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400" />
-                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="text-sm font-medium text-foreground">
                     Scraping avec Google Places API en cours...
                   </span>
                 </div>
                 {progress.total > 0 && (
                   <Progress
                     value={(progress.current / progress.total) * 100}
-                    className="h-2.5 bg-blue-100 dark:bg-blue-950/50"
+                    className="h-2.5 bg-secondary"
                   />
                 )}
               </div>
             )}
 
             {results.length > 0 && (
-              <div className="mt-6 rounded-2xl overflow-hidden border border-border/40 dark:border-border/20 shadow-xl dark:shadow-gray-950/50 bg-white dark:bg-gray-800/50 transition-all duration-300">
+              <div className="mt-6 rounded-2xl overflow-hidden border border-border shadow-xl bg-white dark:bg-card transition-all duration-300">
                 <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
               </div>
             )}

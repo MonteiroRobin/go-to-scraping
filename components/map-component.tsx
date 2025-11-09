@@ -273,10 +273,10 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
         drawingMode: null,
         drawingControl: false,
         rectangleOptions: {
-          fillColor: theme === "dark" ? "#C4B896" : "#4A90E2",
+          fillColor: "#000000",
           fillOpacity: 0.1,
           strokeWeight: 2,
-          strokeColor: theme === "dark" ? "#C4B896" : "#4A90E2",
+          strokeColor: "#000000",
           clickable: false,
           editable: false,
           zIndex: 1,
@@ -312,18 +312,18 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
 
     if (rectangleRef.current) {
       rectangleRef.current.setOptions({
-        fillColor: theme === "dark" ? "#C4B896" : "#4A90E2",
-        strokeColor: theme === "dark" ? "#C4B896" : "#4A90E2",
+        fillColor: "#000000",
+        strokeColor: "#000000",
       })
     }
 
     if (drawingManagerRef.current) {
       drawingManagerRef.current.setOptions({
         rectangleOptions: {
-          fillColor: theme === "dark" ? "#C4B896" : "#4A90E2",
+          fillColor: "#000000",
           fillOpacity: 0.1,
           strokeWeight: 2,
-          strokeColor: theme === "dark" ? "#C4B896" : "#4A90E2",
+          strokeColor: "#000000",
           clickable: false,
           editable: false,
           zIndex: 1,
@@ -346,7 +346,7 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
         icon: {
           path: window.google.maps.SymbolPath.CIRCLE,
           scale: 8,
-          fillColor: theme === "dark" ? "#C4B896" : "#4A90E2",
+          fillColor: "#000000",
           fillOpacity: 0.8,
           strokeColor: "#ffffff",
           strokeWeight: 2,
@@ -466,7 +466,7 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
           size="lg"
           onClick={handleLocateMe}
           disabled={!isMapReady}
-          className="bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6"
+          className="bg-white dark:bg-card hover:bg-secondary text-foreground border border-border shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6"
           title="Me localiser"
         >
           <Locate className="w-5 h-5" />
@@ -480,8 +480,8 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
           disabled={!isMapReady}
           className={
             selectionMode
-              ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white border-2 border-blue-400 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6"
-              : "bg-white dark:bg-gray-900 hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-700 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6"
+              ? "bg-primary hover:bg-primary/90 text-primary-foreground border border-primary shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6"
+              : "bg-white dark:bg-card hover:bg-secondary text-foreground border border-border shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6"
           }
           title="Outil de sélection rectangle"
         >
@@ -494,7 +494,7 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
           size="lg"
           onClick={handleReset}
           disabled={!hasRectangle}
-          className="bg-white dark:bg-gray-900 hover:bg-orange-50 dark:hover:bg-gray-800 text-orange-600 dark:text-orange-400 border-2 border-orange-200 dark:border-orange-900 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="bg-white dark:bg-card hover:bg-destructive/10 text-destructive border border-destructive shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
           title="Réinitialiser la sélection"
         >
           <RotateCcw className="w-5 h-5" />
@@ -506,7 +506,7 @@ export function MapComponent({ onZoneConfirm, markers = [], centerLocation }: Ma
           size="lg"
           onClick={handleConfirm}
           disabled={!hasRectangle}
-          className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white border-2 border-green-400 shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground border border-primary shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 font-semibold gap-2 h-14 px-6 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
           title="Confirmer la zone"
         >
           <Check className="w-5 h-5" />

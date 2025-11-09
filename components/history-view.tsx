@@ -110,7 +110,7 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
   }
@@ -118,11 +118,11 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
   return (
     <div className="space-y-6">
       {!supabaseConfigured && (
-        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        <div className="p-4 bg-secondary border border-border rounded-xl flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-amber-900 dark:text-amber-200">Supabase non configuré</p>
-            <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+            <p className="text-sm font-medium text-foreground">Supabase non configuré</p>
+            <p className="text-xs text-muted-foreground mt-1">
               L'historique est stocké localement dans votre navigateur. Pour synchroniser entre appareils, configurez
               Supabase dans les variables d'environnement.
             </p>
@@ -130,7 +130,7 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50 shadow-lg dark:shadow-blue-900/20 transition-all duration-300">
+      <div className="flex items-center justify-between p-6 bg-white dark:bg-card rounded-xl border border-border shadow-lg transition-all duration-300">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Historique des recherches</h2>
           <p className="text-sm text-muted-foreground mt-1">
@@ -143,7 +143,7 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
         <div className="flex items-center gap-2">
           {selectedIds.length > 0 ? (
             <>
-              <Button size="sm" variant="outline" onClick={deselectAll} className="bg-white dark:bg-gray-800">
+              <Button size="sm" variant="outline" onClick={deselectAll} className="bg-white dark:bg-card">
                 Désélectionner
               </Button>
               <Button
@@ -151,7 +151,7 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
                 variant="outline"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="gap-2 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                className="gap-2 bg-white dark:bg-card text-destructive hover:bg-destructive/10"
               >
                 {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 Supprimer
@@ -159,14 +159,14 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
               <Button
                 size="sm"
                 onClick={handleExport}
-                className="gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <Download className="w-4 h-4" />
                 Exporter
               </Button>
             </>
           ) : (
-            <Button size="sm" variant="outline" onClick={selectAll} className="bg-white dark:bg-gray-800">
+            <Button size="sm" variant="outline" onClick={selectAll} className="bg-white dark:bg-card">
               Tout sélectionner
             </Button>
           )}
@@ -179,8 +179,8 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
             key={entry.id}
             className={`p-6 rounded-xl border transition-all duration-200 ${
               selectedIds.includes(entry.id)
-                ? "bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-700/50 shadow-md dark:shadow-blue-900/20"
-                : "bg-white dark:bg-gray-800/50 border-border dark:border-gray-700/50 hover:border-blue-200 dark:hover:border-blue-700/50 hover:shadow-md dark:hover:shadow-gray-950/30"
+                ? "bg-secondary border-primary shadow-md"
+                : "bg-white dark:bg-card border-border hover:border-primary hover:shadow-md"
             }`}
           >
             <div className="flex items-start gap-4">
@@ -188,7 +188,7 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
                 type="checkbox"
                 checked={selectedIds.includes(entry.id)}
                 onChange={() => toggleSelection(entry.id)}
-                className="mt-1 w-5 h-5 text-blue-600 dark:text-blue-500 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:bg-gray-700"
+                className="mt-1 w-5 h-5 text-primary rounded border-border focus:ring-primary"
               />
 
               <div className="flex-1 min-w-0">
@@ -197,7 +197,7 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
                     {entry.business_type || "Tous les commerces"}
                   </span>
                   <span className="text-muted-foreground">à</span>
-                  <span className="font-semibold text-lg text-blue-600 dark:text-blue-400">{entry.city}</span>
+                  <span className="font-semibold text-lg text-primary">{entry.city}</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-3">
@@ -228,7 +228,7 @@ export function HistoryView({ onSearch }: HistoryViewProps) {
                     size="sm"
                     variant="outline"
                     onClick={() => handleRerun(entry)}
-                    className="gap-2 bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                    className="gap-2 bg-white dark:bg-card hover:bg-secondary"
                   >
                     <HistoryIcon className="w-3 h-3" />
                     Relancer

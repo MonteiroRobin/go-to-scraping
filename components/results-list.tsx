@@ -47,18 +47,18 @@ const ResultRow = memo(
 
     return (
       <>
-        <tr className="border-b border-border dark:border-gray-700/50 hover:bg-muted/30 dark:hover:bg-gray-700/30 transition-colors duration-150 group">
+        <tr className="border-b border-border hover:bg-muted/30 dark:hover:bg-secondary transition-colors duration-150 group">
           {/* Index */}
-          <td className="px-4 py-3 text-sm text-muted-foreground border-r border-border dark:border-gray-700/50 font-mono">
+          <td className="px-4 py-3 text-sm text-muted-foreground border-r border-border font-mono">
             <div className="flex items-center gap-2">
               <span>{index + 1}</span>
               <button
                 onClick={() => onCopyRow(business)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-gray-600/50 rounded"
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-secondary rounded"
                 title="Copier toute la ligne"
               >
                 {copiedCell === `row-${business.id}` ? (
-                  <Check className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                  <Check className="w-3.5 h-3.5 text-primary" />
                 ) : (
                   <Copy className="w-3.5 h-3.5 text-muted-foreground" />
                 )}
@@ -67,21 +67,21 @@ const ResultRow = memo(
           </td>
 
           {/* Name */}
-          <td className="px-4 py-3 text-sm text-foreground border-r border-border dark:border-gray-700/50 group">
+          <td className="px-4 py-3 text-sm text-foreground border-r border-border group">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{business.name}</span>
                 {hasEnrichedData && (
-                  <Sparkles className="w-3.5 h-3.5 text-black dark:text-gray-300" title="Enrichi par Grok AI" />
+                  <Sparkles className="w-3.5 h-3.5 text-primary" title="Enrichi par Grok AI" />
                 )}
               </div>
               <button
                 onClick={() => onCopy(business.name, `name-${business.id}`)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-gray-600/50 rounded"
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-secondary rounded"
                 title="Copier"
               >
                 {copiedCell === `name-${business.id}` ? (
-                  <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                  <Check className="w-3 h-3 text-primary" />
                 ) : (
                   <Copy className="w-3 h-3 text-muted-foreground" />
                 )}
@@ -90,16 +90,16 @@ const ResultRow = memo(
           </td>
 
           {/* Address */}
-          <td className="px-4 py-3 text-sm text-foreground border-r border-border dark:border-gray-700/50 group">
+          <td className="px-4 py-3 text-sm text-foreground border-r border-border group">
             <div className="flex items-center justify-between gap-2">
               <span>{business.address}</span>
               <button
                 onClick={() => onCopy(business.address, `address-${business.id}`)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-gray-600/50 rounded"
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-secondary rounded"
                 title="Copier"
               >
                 {copiedCell === `address-${business.id}` ? (
-                  <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                  <Check className="w-3 h-3 text-primary" />
                 ) : (
                   <Copy className="w-3 h-3 text-muted-foreground" />
                 )}
@@ -108,23 +108,23 @@ const ResultRow = memo(
           </td>
 
           {/* Phone */}
-          <td className="px-4 py-3 text-sm border-r border-border dark:border-gray-700/50 group">
+          <td className="px-4 py-3 text-sm border-r border-border group">
             {business.phone !== "Non disponible" ? (
               <div className="flex items-center justify-between gap-2">
                 <a
                   href={`tel:${business.phone}`}
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center gap-2"
+                  className="text-primary hover:text-primary/80 transition-colors flex items-center gap-2"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   {business.phone}
                 </a>
                 <button
                   onClick={() => onCopy(business.phone, `phone-${business.id}`)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-gray-600/50 rounded flex-shrink-0"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-secondary rounded flex-shrink-0"
                   title="Copier"
                 >
                   {copiedCell === `phone-${business.id}` ? (
-                    <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                    <Check className="w-3 h-3 text-primary" />
                   ) : (
                     <Copy className="w-3 h-3 text-muted-foreground" />
                   )}
@@ -136,25 +136,25 @@ const ResultRow = memo(
           </td>
 
           {/* Email */}
-          <td className="px-4 py-3 text-sm border-r border-border dark:border-gray-700/50 group">
+          <td className="px-4 py-3 text-sm border-r border-border group">
             {business.email !== "Non disponible" ? (
               <div className="flex items-center justify-between gap-2">
                 <a
                   href={`mailto:${business.email}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors hover:underline flex items-center gap-2 truncate"
+                  className="text-primary hover:text-primary/80 transition-colors hover:underline flex items-center gap-2 truncate"
                 >
                   <Mail className="w-3.5 h-3.5 flex-shrink-0" />
                   <span className="truncate">{business.email}</span>
                 </a>
                 <button
                   onClick={() => onCopy(business.email, `email-${business.id}`)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-gray-600/50 rounded flex-shrink-0"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-secondary rounded flex-shrink-0"
                   title="Copier"
                 >
                   {copiedCell === `email-${business.id}` ? (
-                    <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                    <Check className="w-3 h-3 text-primary" />
                   ) : (
                     <Copy className="w-3 h-3 text-muted-foreground" />
                   )}
@@ -166,25 +166,25 @@ const ResultRow = memo(
           </td>
 
           {/* Website */}
-          <td className="px-4 py-3 text-sm border-r border-border dark:border-gray-700/50 group">
+          <td className="px-4 py-3 text-sm border-r border-border group">
             {business.website !== "Non disponible" ? (
               <div className="flex items-center justify-between gap-2">
                 <a
                   href={business.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors hover:underline flex items-center gap-2 truncate"
+                  className="text-primary hover:text-primary/80 transition-colors hover:underline flex items-center gap-2 truncate"
                 >
                   <Globe className="w-3.5 h-3.5 flex-shrink-0" />
                   <span className="truncate">{business.website.replace(/^https?:\/\//, "")}</span>
                 </a>
                 <button
                   onClick={() => onCopy(business.website, `website-${business.id}`)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-gray-600/50 rounded flex-shrink-0"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-secondary rounded flex-shrink-0"
                   title="Copier"
                 >
                   {copiedCell === `website-${business.id}` ? (
-                    <Check className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                    <Check className="w-3.5 h-3.5 text-primary" />
                   ) : (
                     <Copy className="w-3 h-3 text-muted-foreground" />
                   )}
@@ -196,7 +196,7 @@ const ResultRow = memo(
           </td>
 
           {/* Rating */}
-          <td className="px-4 py-3 text-sm border-r border-border dark:border-gray-700/50">
+          <td className="px-4 py-3 text-sm border-r border-border">
             {business.rating ? (
               <div className="flex items-center gap-1">
                 <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
@@ -211,7 +211,7 @@ const ResultRow = memo(
           </td>
 
           {/* Coordinates */}
-          <td className="px-4 py-3 text-sm font-mono text-muted-foreground border-r border-border dark:border-gray-700/50 group">
+          <td className="px-4 py-3 text-sm font-mono text-muted-foreground border-r border-border group">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs">
                 {business.lat.toFixed(6)}, {business.lon.toFixed(6)}
@@ -220,11 +220,11 @@ const ResultRow = memo(
                 onClick={() =>
                   onCopy(`${business.lat.toFixed(6)}, ${business.lon.toFixed(6)}`, `coords-${business.id}`)
                 }
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-gray-600/50 rounded"
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 p-1 hover:bg-accent dark:hover:bg-secondary rounded"
                 title="Copier"
               >
                 {copiedCell === `coords-${business.id}` ? (
-                  <Check className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                  <Check className="w-3.5 h-3.5 text-primary" />
                 ) : (
                   <Copy className="w-3 h-3 text-muted-foreground" />
                 )}
@@ -237,13 +237,13 @@ const ResultRow = memo(
             {hasEnrichedData && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="p-1 hover:bg-accent dark:hover:bg-gray-600/50 rounded transition-colors duration-150"
+                className="p-1 hover:bg-accent dark:hover:bg-secondary rounded transition-colors duration-150"
                 title={isExpanded ? "Masquer les détails" : "Voir les détails enrichis"}
               >
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4 text-black dark:text-gray-300" />
+                  <ChevronUp className="w-4 h-4 text-primary" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-black dark:text-gray-300" />
+                  <ChevronDown className="w-4 h-4 text-primary" />
                 )}
               </button>
             )}
@@ -251,18 +251,18 @@ const ResultRow = memo(
         </tr>
 
         {isExpanded && hasEnrichedData && (
-          <tr className="border-b border-border dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30">
+          <tr className="border-b border-border bg-secondary">
             <td colSpan={9} className="px-4 py-4">
               <div className="space-y-4 max-w-5xl">
                 <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-black dark:text-gray-300" />
-                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground">
                     Données enrichies par Grok AI
                   </span>
                 </div>
 
                 {business.description && (
-                  <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                  <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Description</h4>
                     <p className="text-sm text-foreground leading-relaxed">{business.description}</p>
                   </div>
@@ -270,21 +270,21 @@ const ResultRow = memo(
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {business.category && (
-                    <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                    <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                       <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Catégorie</h4>
                       <p className="text-sm text-foreground font-medium">{business.category}</p>
                     </div>
                   )}
 
                   {business.estimated_price_range && (
-                    <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                    <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                       <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Gamme de prix</h4>
                       <p className="text-sm text-foreground font-medium text-lg">{business.estimated_price_range}</p>
                     </div>
                   )}
 
                   {business.target_audience && (
-                    <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                    <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                       <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
                         <Users className="w-3 h-3" />
                         Public cible
@@ -295,7 +295,7 @@ const ResultRow = memo(
                 </div>
 
                 {business.best_time_to_visit && (
-                  <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                  <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       Meilleur moment pour visiter
@@ -305,7 +305,7 @@ const ResultRow = memo(
                 )}
 
                 {business.unique_features && business.unique_features.length > 0 && (
-                  <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                  <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
                       <Zap className="w-3 h-3" />
                       Caractéristiques uniques
@@ -313,7 +313,7 @@ const ResultRow = memo(
                     <ul className="space-y-1">
                       {business.unique_features.map((feature, idx) => (
                         <li key={idx} className="text-sm text-foreground flex items-start gap-2">
-                          <span className="text-black dark:text-gray-300 mt-1">•</span>
+                          <span className="text-primary mt-1">•</span>
                           <span>{feature}</span>
                         </li>
                       ))}
@@ -323,13 +323,13 @@ const ResultRow = memo(
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {business.tags && business.tags.length > 0 && (
-                    <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                    <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                       <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Tags</h4>
                       <div className="flex flex-wrap gap-2">
                         {business.tags.map((tag, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-1 bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 text-xs rounded-full border border-gray-300 dark:border-gray-600/50"
+                            className="px-2 py-1 bg-secondary text-foreground text-xs rounded-full border border-border"
                           >
                             {tag}
                           </span>
@@ -339,12 +339,12 @@ const ResultRow = memo(
                   )}
 
                   {business.specialties && business.specialties.length > 0 && (
-                    <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                    <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                       <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Spécialités</h4>
                       <ul className="space-y-1">
                         {business.specialties.map((specialty, idx) => (
                           <li key={idx} className="text-sm text-foreground flex items-start gap-2">
-                            <span className="text-black dark:text-gray-300">•</span>
+                            <span className="text-primary">•</span>
                             <span>{specialty}</span>
                           </li>
                         ))}
@@ -354,7 +354,7 @@ const ResultRow = memo(
                 </div>
 
                 {business.practical_info && (
-                  <div className="p-4 bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
+                  <div className="p-4 bg-white dark:bg-card rounded-lg border border-border">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-3">
                       Informations pratiques
                     </h4>
@@ -469,19 +469,19 @@ export function ResultsList({ results, onExportCSV, onExportSheets }: ResultsLis
 
   return (
     <div className="max-w-full mx-auto overflow-x-auto">
-      <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-700 dark:to-blue-600 px-6 py-4 border-b border-blue-700 dark:border-blue-800/50 shadow-lg dark:shadow-blue-900/30 transition-all duration-300">
+      <div className="sticky top-0 z-10 bg-white dark:bg-card px-6 py-4 border-b border-border shadow-lg transition-all duration-300">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="text-lg font-bold text-foreground">
                 {results.length} {results.length === 1 ? "résultat trouvé" : "résultats trouvés"}
               </h3>
               <div className="flex items-center gap-3">
-                <p className="text-xs text-blue-100">Exportez vos données en un clic</p>
+                <p className="text-xs text-muted-foreground">Exportez vos données en un clic</p>
                 {enrichedCount > 0 && (
-                  <div className="flex items-center gap-1 px-2 py-0.5 bg-black/20 dark:bg-gray-700/50 rounded-full border border-gray-300 dark:border-gray-600/50">
-                    <Sparkles className="w-3 h-3 text-white dark:text-gray-200" />
-                    <span className="text-xs text-white dark:text-gray-200 font-medium">
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded-full border border-border">
+                    <Sparkles className="w-3 h-3 text-foreground" />
+                    <span className="text-xs text-foreground font-medium">
                       {enrichedCount} enrichi{enrichedCount > 1 ? "s" : ""} par Grok AI
                     </span>
                   </div>
@@ -494,7 +494,7 @@ export function ResultsList({ results, onExportCSV, onExportSheets }: ResultsLis
             <Button
               onClick={copyAllData}
               size="lg"
-              className="bg-white hover:bg-blue-50 dark:hover:bg-gray-100 text-blue-700 font-semibold gap-2 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-blue-200 dark:border-blue-300"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 shadow-md hover:shadow-lg transition-all duration-200"
             >
               {copiedCell === "all-data" ? (
                 <>
@@ -511,7 +511,7 @@ export function ResultsList({ results, onExportCSV, onExportSheets }: ResultsLis
             <Button
               onClick={onExportSheets}
               size="lg"
-              className="bg-white hover:bg-blue-50 dark:hover:bg-gray-100 text-blue-700 font-semibold gap-2 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-blue-200 dark:border-blue-300"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 shadow-md hover:shadow-lg transition-all duration-200"
             >
               <FileSpreadsheet className="w-5 h-5" />
               <span>Google Sheets</span>
@@ -519,7 +519,7 @@ export function ResultsList({ results, onExportCSV, onExportSheets }: ResultsLis
             <Button
               onClick={onExportCSV}
               size="lg"
-              className="bg-white hover:bg-blue-50 dark:hover:bg-gray-100 text-blue-700 font-semibold gap-2 shadow-md hover:shadow-lg transition-all duration-200 border-2 border-blue-200 dark:border-blue-300"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2 shadow-md hover:shadow-lg transition-all duration-200"
             >
               <Download className="w-5 h-5" />
               <span>CSV</span>
@@ -533,38 +533,38 @@ export function ResultsList({ results, onExportCSV, onExportSheets }: ResultsLis
           💡 <strong>Astuce :</strong> Survolez une ligne et cliquez sur <Copy className="w-3 h-3 inline" /> à gauche
           pour copier toute la ligne • Cliquez sur les icônes individuelles pour copier une cellule
           {enrichedCount > 0 && (
-            <span className="ml-2 text-gray-900 dark:text-gray-200">
+            <span className="ml-2 text-foreground">
               • Cliquez sur <ChevronDown className="w-3 h-3 inline" /> pour voir les détails enrichis par Grok AI
             </span>
           )}
         </p>
 
-        <div className="border border-border dark:border-gray-700/50 rounded-lg overflow-hidden bg-card dark:bg-gray-800/30 transition-colors duration-300">
+        <div className="border border-border rounded-lg overflow-hidden bg-white dark:bg-card transition-colors duration-300">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-muted/50 dark:bg-gray-800/80 border-b border-border dark:border-gray-700/50">
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border dark:border-gray-700/50 w-20">
+              <tr className="bg-secondary border-b border-border">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border w-20">
                   #
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border dark:border-gray-700/50 min-w-[200px]">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border min-w-[200px]">
                   Nom
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border dark:border-gray-700/50 min-w-[250px]">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border min-w-[250px]">
                   Adresse
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border dark:border-gray-700/50 min-w-[150px]">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border min-w-[150px]">
                   Téléphone
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border dark:border-gray-700/50 min-w-[180px]">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border min-w-[180px]">
                   Email
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border dark:border-gray-700/50 min-w-[200px]">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border min-w-[200px]">
                   Site Web
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border dark:border-gray-700/50 min-w-[100px]">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border min-w-[100px]">
                   Note
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border dark:border-gray-700/50 min-w-[180px]">
+                <th className="px-4 py-3 text-left text-sm font-semibold text-foreground border-r border-border min-w-[180px]">
                   Coordonnées GPS
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-foreground w-12"></th>
