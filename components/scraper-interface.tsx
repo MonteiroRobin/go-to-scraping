@@ -16,6 +16,7 @@ import {
   ChevronUp,
   AlertCircle,
   Sparkles,
+  Download,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
