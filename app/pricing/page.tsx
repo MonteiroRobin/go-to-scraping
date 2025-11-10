@@ -20,21 +20,21 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar simple comme landing */}
-      <nav className="border-b border-border backdrop-blur-md bg-white/60 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <nav className="border-b border-border/50 backdrop-blur-md bg-background/80 dark:bg-background/60 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold">
+            <span className="text-base sm:text-xl font-bold">
               <ShimmerText>Go To Scraping</ShimmerText>
             </span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link href="/">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-xs sm:text-sm">
                 Accueil
               </Button>
             </Link>
             <Link href="/login">
-              <Button variant="default" size="sm">
+              <Button variant="default" size="sm" className="text-xs sm:text-sm px-3 sm:px-4">
                 Commencer
               </Button>
             </Link>
@@ -42,37 +42,37 @@ export default function PricingPage() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Hero Section - Style landing page */}
-        <section className="py-20 text-center">
+        <section className="py-12 sm:py-16 md:py-20 text-center">
           <BlurFade delay={0.1} inView>
-            <div className="max-w-4xl mx-auto space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 text-foreground text-sm font-medium mb-6">
-                <Sparkles className="w-4 h-4" />
+            <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-secondary/50 text-foreground text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="font-semibold">Pricing Transparent</span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground px-4 sm:px-0">
                 Un plan pour chaque besoin
               </h1>
 
-              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Commencez gratuitement, upgradez quand vous voulez. <br />
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
+                Commencez gratuitement, upgradez quand vous voulez. <br className="hidden sm:block" />
                 <span className="text-foreground font-semibold">Le cache vous fait économiser jusqu'à 98% !</span>
               </p>
 
               {/* Trust indicators - noir et blanc */}
-              <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground pt-6">
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground pt-4 sm:pt-6 px-4 sm:px-0">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-foreground" />
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground" />
                   <span>Aucune carte bancaire pour Free</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-foreground" />
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground" />
                   <span>Annulation à tout moment</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-foreground" />
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground" />
                   <span>Garantie 14 jours</span>
                 </div>
               </div>
@@ -86,37 +86,37 @@ export default function PricingPage() {
         </section>
 
         {/* Value Props - Style landing page */}
-        <section className="py-20 border-t border-border">
+        <section className="py-12 sm:py-16 md:py-20 border-t border-border">
           <BlurFade delay={0.2} inView>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <div className="text-center mb-10 sm:mb-16 px-4 sm:px-0">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">
                 Pourquoi choisir GoToScraping ?
               </h2>
-              <p className="text-lg text-muted-foreground">La plateforme de scraping la plus rentable du marché</p>
+              <p className="text-base sm:text-lg text-muted-foreground">La plateforme de scraping la plus rentable du marché</p>
             </div>
           </BlurFade>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <BlurFade delay={0.3} inView>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-foreground/20 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                <div className="w-14 h-14 rounded-xl bg-foreground/5 flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-300">
-                  <Zap className="w-7 h-7 text-foreground" strokeWidth={2} />
+              <div className="group space-y-3 sm:space-y-4 text-center p-6 sm:p-8 rounded-2xl border border-border/50 dark:border-border/30 bg-card/40 dark:bg-card/20 backdrop-blur-md hover:bg-card/70 dark:hover:bg-card/40 hover:border-foreground/20 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-foreground/5 dark:bg-foreground/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-300">
+                  <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-foreground" strokeWidth={2} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Cache intelligent</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Cache intelligent</h3>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   70% de vos recherches utilisent le cache partagé. Résultats instantanés pour seulement 1 crédit.
                 </p>
-                <ul className="space-y-2 text-sm text-muted-foreground text-left">
+                <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground text-left">
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground mt-0.5 flex-shrink-0" />
                     Données fraîches (&lt;7 jours)
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground mt-0.5 flex-shrink-0" />
                     Base de 2M+ établissements
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground mt-0.5 flex-shrink-0" />
                     Économie de 98% vs scraping à chaque fois
                   </li>
                 </ul>
@@ -124,25 +124,25 @@ export default function PricingPage() {
             </BlurFade>
 
             <BlurFade delay={0.4} inView>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-foreground/20 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                <div className="w-14 h-14 rounded-xl bg-foreground/5 flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-300">
-                  <DollarSign className="w-7 h-7 text-foreground" strokeWidth={2} />
+              <div className="group space-y-3 sm:space-y-4 text-center p-6 sm:p-8 rounded-2xl border border-border/50 dark:border-border/30 bg-card/40 dark:bg-card/20 backdrop-blur-md hover:bg-card/70 dark:hover:bg-card/40 hover:border-foreground/20 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-foreground/5 dark:bg-foreground/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-300">
+                  <DollarSign className="w-6 h-6 sm:w-7 sm:h-7 text-foreground" strokeWidth={2} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Pricing honnête</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Pricing honnête</h3>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   Pas de frais cachés. Seulement ce que vous consommez. Annulez ou changez de plan à tout moment.
                 </p>
-                <ul className="space-y-2 text-sm text-muted-foreground text-left">
+                <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground text-left">
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground mt-0.5 flex-shrink-0" />
                     Sans engagement
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground mt-0.5 flex-shrink-0" />
                     Rollover des crédits inutilisés
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground mt-0.5 flex-shrink-0" />
                     Remboursement sous 14 jours
                   </li>
                 </ul>
@@ -150,17 +150,17 @@ export default function PricingPage() {
             </BlurFade>
 
             <BlurFade delay={0.5} inView>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-foreground/20 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                <div className="w-14 h-14 rounded-xl bg-foreground/5 flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-300">
-                  <Shield className="w-7 h-7 text-foreground" strokeWidth={2} />
+              <div className="group space-y-3 sm:space-y-4 text-center p-6 sm:p-8 rounded-2xl border border-border/50 dark:border-border/30 bg-card/40 dark:bg-card/20 backdrop-blur-md hover:bg-card/70 dark:hover:bg-card/40 hover:border-foreground/20 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-foreground/5 dark:bg-foreground/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-300">
+                  <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-foreground" strokeWidth={2} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Support premium</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Support premium</h3>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   Équipe dédiée pour vous aider. Email, chat ou appel. Réponse en moins de 2h.
                 </p>
-                <ul className="space-y-2 text-sm text-muted-foreground text-left">
+                <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground text-left">
                   <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-foreground mt-0.5 flex-shrink-0" />
+                    <Check className="w-3 h-3 sm:w-4 sm:h-4 text-foreground mt-0.5 flex-shrink-0" />
                     Support par email 24/7
                   </li>
                   <li className="flex items-start gap-2">
