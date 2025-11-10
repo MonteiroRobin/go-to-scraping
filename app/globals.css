@@ -3,89 +3,89 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Light mode - Clean green theme inspired by Origin UI */
+/* Light mode - Clean minimal black theme */
 :root {
-  --background: #fafaf9;
-  --foreground: #0a0a0a;
+  --background: #ffffff;
+  --foreground: #000000;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #000000;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
-  --primary: #16a34a;
+  --popover-foreground: #000000;
+  --primary: #000000;
   --primary-foreground: #ffffff;
-  --secondary: #f0fdf4;
-  --secondary-foreground: #14532d;
-  --muted: #f7f7f6;
-  --muted-foreground: #737373;
-  --accent: #dcfce7;
-  --accent-foreground: #15803d;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #000000;
+  --muted: #fafafa;
+  --muted-foreground: #525252;
+  --accent: #f5f5f5;
+  --accent-foreground: #000000;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e7e7e5;
-  --input: #e7e7e5;
-  --ring: #16a34a;
-  --chart-1: #16a34a;
-  --chart-2: #22c55e;
-  --chart-3: #4ade80;
-  --chart-4: #86efac;
-  --chart-5: #bbf7d0;
-  --radius: 0.75rem;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #000000;
+  --chart-1: #000000;
+  --chart-2: #404040;
+  --chart-3: #737373;
+  --chart-4: #a3a3a3;
+  --chart-5: #d4d4d4;
+  --radius: 0.5rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #0a0a0a;
-  --sidebar-primary: #16a34a;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #000000;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0fdf4;
-  --sidebar-accent-foreground: #14532d;
-  --sidebar-border: #e7e7e5;
-  --sidebar-ring: #16a34a;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #000000;
   --shadow-x: 0px;
   --shadow-y: 1px;
   --shadow-blur: 3px;
   --shadow-spread: 0px;
-  --shadow-opacity: 0.08;
-  --shadow-color: #16a34a;
+  --shadow-opacity: 0.1;
+  --shadow-color: #000000;
 }
 
-/* Dark mode - Deep green accents */
+/* Dark mode - Black with white accents */
 .dark {
-  --background: #0a0a0a;
-  --foreground: #fafaf9;
-  --card: #171717;
-  --card-foreground: #fafaf9;
-  --popover: #171717;
-  --popover-foreground: #fafaf9;
-  --primary: #22c55e;
-  --primary-foreground: #052e16;
-  --secondary: #1a2e1a;
-  --secondary-foreground: #bbf7d0;
-  --muted: #1a1a1a;
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #0a0a0a;
+  --card-foreground: #ffffff;
+  --popover: #0a0a0a;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #171717;
+  --secondary-foreground: #ffffff;
+  --muted: #0a0a0a;
   --muted-foreground: #a3a3a3;
-  --accent: #14532d;
-  --accent-foreground: #86efac;
+  --accent: #171717;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #2a2a2a;
-  --input: #2a2a2a;
-  --ring: #22c55e;
-  --chart-1: #22c55e;
-  --chart-2: #4ade80;
-  --chart-3: #86efac;
-  --chart-4: #bbf7d0;
-  --chart-5: #dcfce7;
-  --sidebar: #0a0a0a;
-  --sidebar-foreground: #fafaf9;
-  --sidebar-primary: #22c55e;
-  --sidebar-primary-foreground: #052e16;
-  --sidebar-accent: #1a2e1a;
-  --sidebar-accent-foreground: #bbf7d0;
-  --sidebar-border: #2a2a2a;
-  --sidebar-ring: #22c55e;
+  --border: #262626;
+  --input: #262626;
+  --ring: #ffffff;
+  --chart-1: #ffffff;
+  --chart-2: #d4d4d4;
+  --chart-3: #a3a3a3;
+  --chart-4: #737373;
+  --chart-5: #404040;
+  --sidebar: #000000;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #171717;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #262626;
+  --sidebar-ring: #ffffff;
   --shadow-x: 0px;
   --shadow-y: 1px;
   --shadow-blur: 3px;
   --shadow-spread: 0px;
-  --shadow-opacity: 0.3;
-  --shadow-color: #16a34a;
+  --shadow-opacity: 0.5;
+  --shadow-color: #000000;
 }
 
 @theme inline {
@@ -254,51 +254,51 @@
   /* Enhanced button textures and depth */
   .btn-texture {
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
-      inset 0 -1px 0 0 rgba(0, 0, 0, 0.1),
-      0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
+      0 1px 2px 0 rgba(0, 0, 0, 0.04);
   }
 
   .btn-texture-primary {
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
-      inset 0 -1px 0 0 rgba(0, 0, 0, 0.2),
-      0 2px 4px 0 rgba(22, 163, 74, 0.15),
-      0 4px 8px 0 rgba(22, 163, 74, 0.1);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+      0 2px 4px 0 rgba(0, 0, 0, 0.08),
+      0 4px 8px 0 rgba(0, 0, 0, 0.06);
   }
 
   .btn-texture-hover {
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
-      inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.12),
       0 3px 6px 0 rgba(0, 0, 0, 0.1);
   }
 
   /* Card depth effects */
   .card-elevated {
     box-shadow:
-      0 0 0 1px rgba(0, 0, 0, 0.05),
-      0 2px 4px rgba(0, 0, 0, 0.05),
-      0 12px 24px rgba(0, 0, 0, 0.05);
+      0 0 0 1px rgba(0, 0, 0, 0.04),
+      0 2px 4px rgba(0, 0, 0, 0.04),
+      0 12px 24px rgba(0, 0, 0, 0.04);
   }
 
   .card-elevated-hover {
     box-shadow:
-      0 0 0 1px rgba(0, 0, 0, 0.08),
-      0 4px 8px rgba(0, 0, 0, 0.08),
-      0 16px 32px rgba(0, 0, 0, 0.08);
+      0 0 0 1px rgba(0, 0, 0, 0.06),
+      0 4px 8px rgba(0, 0, 0, 0.06),
+      0 16px 32px rgba(0, 0, 0, 0.06);
   }
 
   /* Input depth */
   .input-depth {
     box-shadow:
-      inset 0 1px 2px 0 rgba(0, 0, 0, 0.05),
-      0 0 0 1px rgba(0, 0, 0, 0.05);
+      inset 0 1px 2px 0 rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(0, 0, 0, 0.04);
   }
 
   .input-depth-focus {
     box-shadow:
-      inset 0 1px 2px 0 rgba(22, 163, 74, 0.1),
-      0 0 0 2px rgba(22, 163, 74, 0.2);
+      inset 0 1px 2px 0 rgba(0, 0, 0, 0.06),
+      0 0 0 2px rgba(0, 0, 0, 0.15);
   }
 }
