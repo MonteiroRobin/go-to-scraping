@@ -4,28 +4,30 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import dynamic from "next/dynamic"
 import { MapPin, Search, Download, Zap, Check, BookOpen, ArrowRight, Sparkles, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
-import { FloatingDots } from "@/components/InteractiveGrid"
 import { ScrollProgress } from "@/components/ScrollProgress"
 import { OrganizationJsonLd, SoftwareApplicationJsonLd } from "@/components/BlogJsonLd"
-import { CustomCursor } from "@/components/CustomCursor"
-import { MagneticButton } from "@/components/MagneticButton"
-import { GradientText, ShimmerText } from "@/components/GradientText"
-import { Tilt3D } from "@/components/Tilt3D"
-import { ParallaxSection } from "@/components/ParallaxSection"
-import { RevealOnScroll } from "@/components/RevealOnScroll"
-import { MapBackground } from "@/components/MapBackground"
-import { SpreadsheetPreview } from "@/components/SpreadsheetPreview"
 import { ShimmerText as MagicShimmer } from "@/components/ui/shimmer-text"
 import { WordRotate } from "@/components/ui/word-rotate"
 import { BlurFade } from "@/components/ui/blur-fade"
 import { NumberTicker } from "@/components/ui/number-ticker"
-import { Spotlight } from "@/components/ui/spotlight"
 import { Marquee } from "@/components/ui/marquee"
+
+// Lazy load heavy components
+const FloatingDots = dynamic(() => import("@/components/InteractiveGrid").then(mod => ({ default: mod.FloatingDots })), { ssr: false })
+const CustomCursor = dynamic(() => import("@/components/CustomCursor").then(mod => ({ default: mod.CustomCursor })), { ssr: false })
+const MagneticButton = dynamic(() => import("@/components/MagneticButton").then(mod => ({ default: mod.MagneticButton })), { ssr: false })
+const GradientText = dynamic(() => import("@/components/GradientText").then(mod => ({ default: mod.GradientText })), { ssr: false })
+const ParallaxSection = dynamic(() => import("@/components/ParallaxSection").then(mod => ({ default: mod.ParallaxSection })), { ssr: false })
+const RevealOnScroll = dynamic(() => import("@/components/RevealOnScroll").then(mod => ({ default: mod.RevealOnScroll })), { ssr: false })
+const MapBackground = dynamic(() => import("@/components/MapBackground").then(mod => ({ default: mod.MapBackground })), { ssr: false })
+const SpreadsheetPreview = dynamic(() => import("@/components/SpreadsheetPreview").then(mod => ({ default: mod.SpreadsheetPreview })), { ssr: false })
+const Spotlight = dynamic(() => import("@/components/ui/spotlight").then(mod => ({ default: mod.Spotlight })), { ssr: false })
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth()

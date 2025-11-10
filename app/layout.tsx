@@ -18,7 +18,9 @@ const inter = Inter({ subsets: ["latin"] })
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-dm-sans"
+  variable: "--font-dm-sans",
+  display: "swap",
+  preload: true,
 })
 
 export const metadata: Metadata = {
