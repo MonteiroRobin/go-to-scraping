@@ -995,9 +995,21 @@ export function ScraperInterface() {
       ) : viewMode === "search" ? (
         <>
           {/* Search Section with Sidebar */}
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex overflow-hidden relative">
+            {/* Background Map */}
+            {mapCenter && (
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0">
+                <MapComponent
+                  center={mapCenter}
+                  results={results}
+                  onZoneSelect={() => {}}
+                  drawingMode={false}
+                />
+              </div>
+            )}
+
             {/* Main Search Area */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto relative z-10">
               <div className="p-6 lg:p-8 max-w-6xl">
                 <div className="mb-6">
                   <h2 className="text-2xl font-semibold text-foreground">Nouvelle recherche</h2>
@@ -1113,8 +1125,6 @@ export function ScraperInterface() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
 
           {(isLoading || isEnriching) && (
             <div className="bg-secondary/50 backdrop-blur-sm border-b border-border/50 transition-all duration-300">
@@ -1150,6 +1160,8 @@ export function ScraperInterface() {
                   />
                 )}
               </div>
+            </div>
+          )}
 
                 {results.length === 0 && !isLoading && (
                   <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-12 bg-card/30 backdrop-blur-sm rounded-2xl border-2 border-dashed border-border/60">
