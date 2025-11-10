@@ -31,8 +31,8 @@ export function PricingCard({ plan, onSelectPlan, isLoading = false }: PricingCa
       className={cn(
         "relative flex flex-col h-full rounded-2xl border-2 transition-all duration-300",
         plan.highlighted
-          ? "border-primary shadow-2xl shadow-primary/20 scale-105 bg-gradient-to-b from-primary/5 to-background"
-          : "border-border hover:border-primary/50 hover:shadow-xl bg-card",
+          ? "border-foreground/20 shadow-2xl shadow-foreground/10 scale-105 bg-gradient-to-b from-foreground/5 to-background"
+          : "border-border hover:border-foreground/20 hover:shadow-xl bg-card",
         "hover:-translate-y-1"
       )}
     >
@@ -80,13 +80,13 @@ export function PricingCard({ plan, onSelectPlan, isLoading = false }: PricingCa
               <div
                 className={cn(
                   "mt-0.5 rounded-full p-0.5",
-                  feature.included ? "bg-green-500/20" : "bg-muted"
+                  feature.included ? "bg-foreground/10" : "bg-muted"
                 )}
               >
                 <Check
                   className={cn(
                     "w-4 h-4",
-                    feature.included ? "text-green-600 dark:text-green-400" : "text-muted-foreground/30"
+                    feature.included ? "text-foreground" : "text-muted-foreground/30"
                   )}
                 />
               </div>
