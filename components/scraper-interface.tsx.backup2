@@ -33,14 +33,6 @@ import { ResultsGrid } from "@/components/results-grid"
 import { FiltersPanel, type FilterOptions } from "@/components/filters-panel"
 import { ScrapingJobStatus, type ScrapingJob } from "@/components/scraping-job-status"
 import { UserCreditsDisplay } from "@/components/user-credits-display"
-import { ScraperNavbar } from "@/components/scraper-navbar"
-import { ScrapingStats } from "@/components/scraping-stats"
-import { BusinessCardPremium } from "@/components/business-card-premium"
-import { EmptyStateScraper } from "@/components/empty-state-scraper"
-import dynamic from "next/dynamic"
-
-// Lazy load heavy components
-const FloatingDots = dynamic(() => import("@/components/InteractiveGrid").then(mod => ({ default: mod.FloatingDots })), { ssr: false })
 
 export interface Business {
   id: string
@@ -155,19 +147,85 @@ export function ScraperInterface() {
     return filtered
   }, [results, filters])
 
-  // Use our premium stats component
   const statsDisplay = useMemo(() => {
+    if (results.length === 0) return null
+
     return (
-      <ScrapingStats
-        total={results.length}
-        newCount={newCount}
-        duplicateCount={duplicateCount}
-        isLoading={isLoading}
-        isEnriching={isEnriching}
-        progress={progress}
-        enrichmentProgress={enrichmentProgress}
-        className="mt-6"
-      />
+      <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-6 bg-card/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-border/50 shadow-lg transition-all duration-300 hover:shadow-xl hover:bg-card/90">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 w-full">
+            <div className="flex-shrink-0">
+              <div className="text-2xl sm:text-4xl font-bold text-foreground">
+                {results.length}
+              </div>
+              <div className="text-xs sm:text-sm text-muted-foreground font-medium">
+                {results.length === 1 ? "commerce trouvé" : "commerces trouvés"}
+              </div>
+            </div>
+
+            {(newCount > 0 || duplicateCount > 0) && (
+              <div className="flex gap-2 sm:gap-4 flex-wrap">
+                {newCount > 0 && (
+                  <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-secondary rounded-lg border border-border">
+                    <div className="text-lg sm:text-2xl font-bold text-foreground">{newCount}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">nouveaux</div>
+                  </div>
+                )}
+                {duplicateCount > 0 && (
+                  <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-secondary rounded-lg border border-border">
+                    <div className="text-lg sm:text-2xl font-bold text-foreground">{duplicateCount}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">déjà scrapés</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isEnriching && enrichmentProgress.total > 0 && (
+              <div className="flex-1 min-w-[150px] sm:min-w-[200px] w-full sm:w-auto">
+                <div className="flex items-center justify-between text-[10px] sm:text-xs mb-2">
+                  <span className="text-foreground font-medium">
+                    Enrichissement Grok {enrichmentProgress.current}/{enrichmentProgress.total}
+                  </span>
+                  <span className="text-muted-foreground font-semibold">
+                    {Math.round((enrichmentProgress.current / enrichmentProgress.total) * 100)}%
+                  </span>
+                </div>
+                <Progress
+                  value={(enrichmentProgress.current / enrichmentProgress.total) * 100}
+                  className="h-2 sm:h-2.5 bg-secondary"
+                />
+              </div>
+            )}
+
+            {isLoading && progress.total > 0 && !isEnriching && (
+              <div className="flex-1 min-w-[150px] sm:min-w-[200px] w-full sm:w-auto">
+                <div className="flex items-center justify-between text-[10px] sm:text-xs mb-2">
+                  <span className="text-foreground font-medium">
+                    Scraping {progress.current}/{progress.total}
+                  </span>
+                  <span className="text-muted-foreground font-semibold">
+                    {Math.round((progress.current / progress.total) * 100)}%
+                  </span>
+                </div>
+                <Progress
+                  value={(progress.current / progress.total) * 100}
+                  className="h-2 sm:h-2.5 bg-secondary"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {duplicateCount > 0 && (
+          <Alert className="border-border bg-secondary">
+            <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+            <AlertDescription className="text-xs sm:text-sm text-foreground">
+              {duplicateCount} {duplicateCount === 1 ? "établissement a" : "établissements ont"} déjà été scrapé
+              {duplicateCount > 1 ? "s" : ""} précédemment. Les données ont été mises à jour.
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
     )
   }, [results.length, isLoading, isEnriching, progress, enrichmentProgress, newCount, duplicateCount])
 
@@ -926,10 +984,7 @@ export function ScraperInterface() {
   }
 
   return (
-    <div className="min-h-screen flex bg-background relative overflow-hidden">
-      {/* Background Effects */}
-      <FloatingDots />
-
+    <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 border-r-2 border-border bg-card/30 backdrop-blur-xl card-elevated">
         <div className="p-6 border-b border-border">
