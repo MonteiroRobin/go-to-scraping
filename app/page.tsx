@@ -68,10 +68,10 @@ export default function HomePage() {
       <FloatingDots />
       <CustomCursor />
 
-      <nav className="border-b border-border backdrop-blur-md bg-white/60 sticky top-0 z-40">
+      <nav className="border-b border-border/50 backdrop-blur-md bg-background/80 dark:bg-background/60 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center border border-primary/20 dark:border-primary/30">
               <MapPin className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
             <span className="text-xl font-semibold text-foreground">
@@ -110,7 +110,7 @@ export default function HomePage() {
           <RevealOnScroll>
             <div className="max-w-4xl mx-auto space-y-8">
               <div className="flex items-center justify-center gap-4">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium animate-pulse">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20 dark:border-primary/30 text-sm font-medium animate-pulse">
                   <Sparkles className="w-4 h-4" />
                   <span className="font-semibold">Bêta privée - Accès limité</span>
                 </div>
@@ -123,7 +123,7 @@ export default function HomePage() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="votre@email.com"
                       required
-                      className="h-9 text-sm border focus:border-primary bg-white w-48"
+                      className="h-9 text-sm border focus:border-primary bg-background dark:bg-background/80 w-48"
                     />
                     <MagneticButton
                       type="submit"
@@ -135,7 +135,7 @@ export default function HomePage() {
                     </MagneticButton>
                   </form>
                 ) : (
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20 dark:border-primary/30 text-sm">
                     <Check className="w-4 h-4" />
                     <span className="font-semibold">Inscrit !</span>
                   </div>
@@ -144,8 +144,8 @@ export default function HomePage() {
 
               <div className="max-w-4xl mx-auto space-y-6">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-3xl blur-xl animate-gradient"></div>
-                  <div className="relative flex items-center gap-4 p-6 md:p-8 bg-white/90 backdrop-blur-sm border-2 border-border/50 rounded-3xl shadow-2xl transition-all duration-500 hover:shadow-[0_20px_50px_rgba(22,163,74,0.15)]">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 rounded-3xl blur-xl animate-gradient"></div>
+                  <div className="relative flex items-center gap-4 p-6 md:p-8 bg-background/90 dark:bg-background/60 backdrop-blur-sm border-2 border-border/50 dark:border-border/30 rounded-3xl shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(22,163,74,0.15)] dark:hover:shadow-[0_20px_50px_rgba(22,163,74,0.25)]">
                     <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-left flex-1">
                       <MagicShimmer className="text-foreground/90">
                         Pêchez vos leads
@@ -193,7 +193,7 @@ export default function HomePage() {
         </section>
 
         {/* Marquee Section */}
-        <section className="py-12 border-t border-border/50 bg-secondary/30 relative overflow-hidden">
+        <section className="py-12 border-t border-border/50 bg-secondary/30 dark:bg-secondary/10 relative overflow-hidden">
           <BlurFade delay={0.1} inView>
             <div className="mb-8 text-center">
               <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
@@ -214,7 +214,7 @@ export default function HomePage() {
             ].map((feature, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 px-6 py-3 mx-3 bg-card/60 backdrop-blur-sm rounded-full border border-border/50 text-sm font-medium whitespace-nowrap shadow-sm hover:shadow-md transition-shadow"
+                className="flex items-center gap-2 px-6 py-3 mx-3 bg-card/60 dark:bg-card/40 backdrop-blur-sm rounded-full border border-border/50 dark:border-border/30 text-sm font-medium whitespace-nowrap shadow-sm hover:shadow-md transition-shadow"
               >
                 {feature}
               </div>
@@ -225,8 +225,8 @@ export default function HomePage() {
         <ParallaxSection speed={0.2} className="py-32 border-t border-border relative z-0">
           <div className="grid md:grid-cols-3 gap-8">
             <BlurFade delay={0.2} inView>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 dark:border-border/30 bg-card/40 dark:bg-card/20 backdrop-blur-md hover:bg-card/70 dark:hover:bg-card/40 hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)] dark:hover:shadow-[0_10px_30px_rgba(22,163,74,0.2)]">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 flex items-center justify-center mx-auto border border-primary/10 dark:border-primary/20 group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 dark:group-hover:from-primary/30 dark:group-hover:to-primary/20 transition-all duration-300">
                   <Search className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -239,8 +239,8 @@ export default function HomePage() {
             </BlurFade>
 
             <BlurFade delay={0.3} inView>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 dark:border-border/30 bg-card/40 dark:bg-card/20 backdrop-blur-md hover:bg-card/70 dark:hover:bg-card/40 hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)] dark:hover:shadow-[0_10px_30px_rgba(22,163,74,0.2)]">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 flex items-center justify-center mx-auto border border-primary/10 dark:border-primary/20 group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 dark:group-hover:from-primary/30 dark:group-hover:to-primary/20 transition-all duration-300">
                   <MapPin className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -253,8 +253,8 @@ export default function HomePage() {
             </BlurFade>
 
             <BlurFade delay={0.4} inView>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 dark:border-border/30 bg-card/40 dark:bg-card/20 backdrop-blur-md hover:bg-card/70 dark:hover:bg-card/40 hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)] dark:hover:shadow-[0_10px_30px_rgba(22,163,74,0.2)]">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 flex items-center justify-center mx-auto border border-primary/10 dark:border-primary/20 group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 dark:group-hover:from-primary/30 dark:group-hover:to-primary/20 transition-all duration-300">
                   <Download className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -275,7 +275,7 @@ export default function HomePage() {
 
         <section className="py-20 text-center border-t border-border">
           <div className="max-w-2xl mx-auto space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 flex items-center justify-center mx-auto">
               <Zap className="w-8 h-8 text-primary" strokeWidth={2} />
             </div>
             <h2 className="text-3xl font-bold text-foreground">Accès anticipé disponible</h2>
@@ -303,8 +303,8 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <Link href="/blog/introduction-web-scraping-2025" className="group">
-              <article className="border border-border rounded-lg p-6 hover:shadow-lg transition-all bg-card h-full">
-                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <article className="border border-border dark:border-border/30 rounded-lg p-6 hover:shadow-lg dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all bg-card dark:bg-card/40 h-full">
+                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20 dark:border-primary/30 text-sm font-medium mb-4">
                   Guide
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
@@ -321,8 +321,8 @@ export default function HomePage() {
             </Link>
 
             <Link href="/blog/google-places-api-vs-scraping" className="group">
-              <article className="border border-border rounded-lg p-6 hover:shadow-lg transition-all bg-card h-full">
-                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <article className="border border-border dark:border-border/30 rounded-lg p-6 hover:shadow-lg dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all bg-card dark:bg-card/40 h-full">
+                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20 dark:border-primary/30 text-sm font-medium mb-4">
                   Comparaison
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
@@ -339,8 +339,8 @@ export default function HomePage() {
             </Link>
 
             <Link href="/blog/automatiser-prospection-commerciale" className="group">
-              <article className="border border-border rounded-lg p-6 hover:shadow-lg transition-all bg-card h-full">
-                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <article className="border border-border dark:border-border/30 rounded-lg p-6 hover:shadow-lg dark:hover:shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all bg-card dark:bg-card/40 h-full">
+                <div className="inline-block px-3 py-1 rounded-full bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20 dark:border-primary/30 text-sm font-medium mb-4">
                   Business
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
