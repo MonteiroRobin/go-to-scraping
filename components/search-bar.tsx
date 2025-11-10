@@ -2,10 +2,11 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { Search, Sparkles, X } from "lucide-react"
+import { Search, Sparkles, X, Clock, Zap, AlertTriangle, Coins } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface SearchBarProps {
   onSearch: (
@@ -15,11 +16,20 @@ interface SearchBarProps {
     location?: { lat: number; lon: number },
   ) => void
   isLoading: boolean
+  userId?: string
 }
 
 export interface SearchFilters {
   keywords: string
   useGrokEnrichment?: boolean
+}
+
+interface CacheStatus {
+  cacheStatus: "fresh" | "stale" | "none"
+  cachedCount: number
+  avgFreshnessHours: number
+  creditsNeeded: number
+  message: string
 }
 
 const KEYWORD_RECOMMENDATIONS: Record<string, string[]> = {
@@ -35,13 +45,18 @@ const KEYWORD_RECOMMENDATIONS: Record<string, string[]> = {
   magasin: ["ouvert dimanche", "parking", "livraison", "retrait gratuit", "soldes"],
 }
 
-export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
+export function SearchBar({ onSearch, isLoading, userId }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [citySuggestions, setCitySuggestions] = useState<any[]>([])
   const [showCitySuggestions, setShowCitySuggestions] = useState(false)
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([])
   const [recommendedKeywords, setRecommendedKeywords] = useState<string[]>([])
   const searchInputRef = useRef<HTMLDivElement>(null)
+
+  // Cache status state
+  const [cacheStatus, setCacheStatus] = useState<CacheStatus | null>(null)
+  const [isCheckingCache, setIsCheckingCache] = useState(false)
+  const [selectedCity, setSelectedCity] = useState<any>(null)
 
   const parseSearchQuery = (query: string) => {
     const lowerQuery = query.toLowerCase().trim()
@@ -136,14 +151,53 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
       setSearchQuery(cityName)
     }
 
+    setSelectedCity(city)
     setShowCitySuggestions(false)
+
+    // Auto-check cache when city is selected
+    if (businessType && city) {
+      checkCache(city, businessType)
+    }
+  }
+
+  const checkCache = async (city: any, businessType: string) => {
+    if (!city) return
+
+    setIsCheckingCache(true)
+    setCacheStatus(null)
+
+    try {
+      const location = {
+        lat: Number.parseFloat(city.lat),
+        lon: Number.parseFloat(city.lon),
+      }
+
+      const response = await fetch("/api/scraping/check-cache", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          city: city.display_name.split(",")[0],
+          businessType,
+          location,
+          radius: 5000,
+          keywords: selectedKeywords.join(" "),
+        }),
+      })
+
+      const data = await response.json()
+      setCacheStatus(data)
+    } catch (error) {
+      console.error("Error checking cache:", error)
+    } finally {
+      setIsCheckingCache(false)
+    }
   }
 
   const toggleKeyword = (keyword: string) => {
     setSelectedKeywords((prev) => (prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword]))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!searchQuery.trim()) {
@@ -157,13 +211,19 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
       return
     }
 
-    // Find location from suggestions if available
-    const selectedCity = citySuggestions.find((c) =>
+    // Find location from suggestions or use selected city
+    const cityData = selectedCity || citySuggestions.find((c) =>
       city.toLowerCase().includes(c.display_name.split(",")[0].toLowerCase()),
     )
-    const location = selectedCity
-      ? { lat: Number.parseFloat(selectedCity.lat), lon: Number.parseFloat(selectedCity.lon) }
+
+    const location = cityData
+      ? { lat: Number.parseFloat(cityData.lat), lon: Number.parseFloat(cityData.lon) }
       : undefined
+
+    if (!location) {
+      alert("Veuillez sélectionner une ville dans les suggestions.")
+      return
+    }
 
     const filters: SearchFilters = {
       keywords: selectedKeywords.join(" "),
@@ -267,6 +327,76 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
             </Badge>
           ))}
         </div>
+      )}
+
+      {/* Cache Status Display */}
+      {isCheckingCache && (
+        <Alert className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+          <Clock className="h-4 w-4 animate-spin text-blue-600" />
+          <AlertDescription className="text-blue-900 dark:text-blue-100">
+            Vérification du cache en cours...
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {cacheStatus && !isCheckingCache && (
+        <>
+          {cacheStatus.cacheStatus === "fresh" && (
+            <Alert className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+              <Zap className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-900 dark:text-green-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold">⚡ {cacheStatus.cachedCount} résultats en cache (frais)</span>
+                    <span className="text-xs block mt-1">Données de moins de 7 jours</span>
+                  </div>
+                  <Badge variant="outline" className="bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700">
+                    <Coins className="h-3 w-3 mr-1" />
+                    {cacheStatus.creditsNeeded} crédit
+                  </Badge>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {cacheStatus.cacheStatus === "stale" && (
+            <Alert className="bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-900 dark:text-yellow-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold">⚠️ {cacheStatus.cachedCount} résultats en cache (ancien)</span>
+                    <span className="text-xs block mt-1">
+                      Données de {Math.round(cacheStatus.avgFreshnessHours / 24)} jours - Re-scraping recommandé
+                    </span>
+                  </div>
+                  <Badge variant="outline" className="bg-yellow-100 dark:bg-yellow-900 border-yellow-300 dark:border-yellow-700">
+                    <Coins className="h-3 w-3 mr-1" />
+                    {cacheStatus.creditsNeeded} crédits
+                  </Badge>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {cacheStatus.cacheStatus === "none" && (
+            <Alert className="bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
+              <Search className="h-4 w-4 text-orange-600" />
+              <AlertDescription className="text-orange-900 dark:text-orange-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold">🔍 Nouveau scraping nécessaire</span>
+                    <span className="text-xs block mt-1">Aucune donnée en cache pour cette recherche</span>
+                  </div>
+                  <Badge variant="outline" className="bg-orange-100 dark:bg-orange-900 border-orange-300 dark:border-orange-700">
+                    <Coins className="h-3 w-3 mr-1" />
+                    {cacheStatus.creditsNeeded} crédits
+                  </Badge>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+        </>
       )}
 
       <Button

@@ -7,7 +7,7 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!
 
 export async function POST(request: NextRequest) {
   try {
-    const { location, radius, type, keyword, userId } = await request.json()
+    const { location, radius, type, keyword, userId, includeContactData = false } = await request.json()
 
     if (!PLACE_API_KEY) {
       return NextResponse.json({ error: "PLACE_API_KEY not configured" }, { status: 500 })
@@ -40,18 +40,36 @@ export async function POST(request: NextRequest) {
       requestBody.includedTypes = [type]
     }
 
-    // Field mask - specify which fields we want
-    const fieldMask = [
+    // Field mask - OPTIMIZED for cost reduction
+    // Basic Data SKU: $0.017 per request (47% cheaper!)
+    const basicFields = [
       "places.id",
       "places.displayName",
       "places.formattedAddress",
       "places.location",
-      "places.rating",
-      "places.userRatingCount",
+      "places.types",
+    ]
+
+    // Contact Data SKU: +$0.003 per request (only if needed)
+    const contactFields = [
       "places.internationalPhoneNumber",
       "places.websiteUri",
-      "places.types",
-    ].join(",")
+      "places.currentOpeningHours",
+    ]
+
+    // Atmosphere Data SKU: +$0.005 per request (only if needed)
+    const atmosphereFields = ["places.rating", "places.userRatingCount", "places.photos"]
+
+    // Build field mask based on request type
+    let fieldMask: string
+    if (includeContactData) {
+      // Complete scraping: Basic + Contact + Atmosphere (0.025€)
+      fieldMask = [...basicFields, ...contactFields, ...atmosphereFields].join(",")
+    } else {
+      // Basic scraping: Only essential fields (0.017€)
+      // Include rating for sorting but skip expensive contact data
+      fieldMask = [...basicFields, "places.rating", "places.userRatingCount"].join(",")
+    }
 
     console.log("[v0] Fetching from Google Places API (New):", newApiUrl)
     console.log("[v0] Request body:", JSON.stringify(requestBody, null, 2))

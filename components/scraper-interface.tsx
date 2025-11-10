@@ -31,6 +31,8 @@ import { TipsSidebar } from "@/components/tips-sidebar"
 import { StatsDashboard } from "@/components/stats-dashboard"
 import { ResultsGrid } from "@/components/results-grid"
 import { FiltersPanel, type FilterOptions } from "@/components/filters-panel"
+import { ScrapingJobStatus, type ScrapingJob } from "@/components/scraping-job-status"
+import { UserCreditsDisplay } from "@/components/user-credits-display"
 
 export interface Business {
   id: string
@@ -96,6 +98,9 @@ export function ScraperInterface() {
   // Filters
   const [filters, setFilters] = useState<FilterOptions>({})
   const [showFilters, setShowFilters] = useState(false)
+
+  // Scraping Jobs
+  const [activeJobId, setActiveJobId] = useState<string | null>(null)
 
   // Filtered results based on active filters
   const filteredResults = useMemo(() => {
@@ -678,41 +683,89 @@ export function ScraperInterface() {
         console.log("[v0] City location:", cityLocation)
         setMapCenter(cityLocation)
 
-        const businesses = await scrapeWithGooglePlaces(
-          { lat: cityLocation.lat, lng: cityLocation.lon },
-          businessType,
-          { ...filters, useGrokEnrichment: false },
-        )
+        // Use new async scraping API
+        const response = await fetch("/api/scraping/start-job", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            city,
+            businessType,
+            keywords: filters.keywords,
+            location: { lat: cityLocation.lat, lon: cityLocation.lon },
+            radius: 5000,
+            userId: user?.id || "anonymous",
+            useCache: true,
+          }),
+        })
 
-        console.log("[v0] Search complete, found", businesses.length, "businesses")
-        setResults(businesses)
-        setProgress({ current: 1, total: 1 })
-
-        if (businesses.length > 0) {
-          setCanEnrich(true)
-          setShowGrokPrompt(true)
+        if (!response.ok) {
+          throw new Error("Failed to start scraping job")
         }
 
-        // Save to history
-        if (user) {
-          try {
-            await saveSearchHistory(user.id, city, businessType || "Tous", filters.keywords || null, businesses.length)
-            console.log("[v0] Search history saved to database")
-          } catch (error) {
-            console.error("[v0] Error saving search history:", error)
+        const data = await response.json()
+        console.log("[v0] Start job response:", data)
+
+        // If cached, results are returned immediately
+        if (data.status === "completed" && data.wasCached) {
+          console.log("[v0] Cache hit! Displaying cached results")
+          const businesses = data.results || []
+          setResults(businesses)
+          setProgress({ current: 1, total: 1 })
+          setDuplicateCount(data.results?.length || 0)
+
+          if (businesses.length > 0) {
+            setCanEnrich(true)
+            setShowGrokPrompt(true)
           }
+
+          // Save to history
+          if (user) {
+            try {
+              await saveSearchHistory(user.id, city, businessType || "Tous", filters.keywords || null, businesses.length)
+              console.log("[v0] Search history saved to database")
+            } catch (error) {
+              console.error("[v0] Error saving search history:", error)
+            }
+          }
+
+          setIsLoading(false)
+        } else if (data.jobId) {
+          // Async job created - will be handled by ScrapingJobStatus component
+          console.log("[v0] Scraping job created:", data.jobId)
+          setActiveJobId(data.jobId)
+          setIsLoading(false)
+        } else {
+          throw new Error("Invalid response from server")
         }
       } catch (error: any) {
         console.error("[v0] Error searching businesses:", error)
         alert(`❌ Erreur lors de la recherche: ${error.message}`)
         setResults([])
-      } finally {
         setIsLoading(false)
-        setProgress({ current: 0, total: 0 })
       }
     },
     [user],
   )
+
+  const handleJobComplete = (jobResults: any) => {
+    console.log("[v0] Job completed with results:", jobResults)
+    if (jobResults && jobResults.length > 0) {
+      setResults(jobResults)
+      setCanEnrich(true)
+      setShowGrokPrompt(true)
+    }
+    setActiveJobId(null)
+  }
+
+  const handleJobError = (error: string) => {
+    console.error("[v0] Job failed:", error)
+    alert(`❌ Erreur lors du scraping: ${error}`)
+    setActiveJobId(null)
+  }
+
+  const handleJobClose = () => {
+    setActiveJobId(null)
+  }
 
   const handleEnrichWithGrok = async () => {
     if (results.length === 0) return
@@ -1040,6 +1093,14 @@ export function ScraperInterface() {
               </div>
             </div>
           )}
+
+          {/* Credits Display */}
+          {user && (
+            <div className="flex justify-center">
+              <UserCreditsDisplay />
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Button onClick={logout} variant="ghost" size="sm" className="flex-1 gap-2">
@@ -1055,6 +1116,7 @@ export function ScraperInterface() {
         <div className="px-4 py-3 flex items-center justify-between">
           <h1 className="text-lg font-semibold">Go To Scraping</h1>
           <div className="flex items-center gap-2">
+            {user && <UserCreditsDisplay />}
             <ThemeToggle />
             <Button onClick={logout} variant="ghost" size="sm">
               <LogOut className="w-4 h-4" />
@@ -1118,7 +1180,7 @@ export function ScraperInterface() {
                   <h2 className="text-2xl font-semibold text-foreground">Nouvelle recherche</h2>
                   <p className="text-sm text-muted-foreground mt-1">Recherchez des commerces par ville et type d'établissement</p>
                 </div>
-                <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
+                <SearchBar onSearch={handleSearch} isLoading={isLoading} userId={user?.id} />
 
               <div className="mt-6">
                 <Button
@@ -1479,6 +1541,16 @@ export function ScraperInterface() {
       {/* Filters Panel Modal */}
       {showFilters && (
         <FiltersPanel filters={filters} onFiltersChange={setFilters} onClose={() => setShowFilters(false)} />
+      )}
+
+      {/* Scraping Job Status */}
+      {activeJobId && (
+        <ScrapingJobStatus
+          jobId={activeJobId}
+          onComplete={handleJobComplete}
+          onError={handleJobError}
+          onClose={handleJobClose}
+        />
       )}
     </div>
   )
