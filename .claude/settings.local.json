@@ -24,7 +24,11 @@
       "Bash(fold:*)",
       "Bash(git restore:*)",
       "Bash(pnpm dlx shadcn add https://tailark.com/r/features-9)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(timeout:*)",
+      "Bash(copy:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm run build)",
+      "Bash(set NODE_OPTIONS=--max-old-space-size=4096)"
     ],
     "deny": [],
     "ask": []
