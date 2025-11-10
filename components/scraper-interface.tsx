@@ -1072,9 +1072,9 @@ export function ScraperInterface() {
                 )}
               </div>
 
-              {statsDisplay}
+                {statsDisplay}
 
-              {showGrokPrompt && canEnrich && !isEnriching && (
+                {showGrokPrompt && canEnrich && !isEnriching && (
                 <div className="mt-6 p-6 bg-gradient-to-br from-primary/5 via-primary/10 to-accent/20 backdrop-blur-sm rounded-xl border border-primary/30 shadow-lg transition-all duration-300 hover:shadow-xl">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-full flex items-center justify-center">
@@ -1150,44 +1150,42 @@ export function ScraperInterface() {
                   />
                 )}
               </div>
-            </div>
-          )}
 
                 {results.length === 0 && !isLoading && (
-                <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-12 bg-card/30 backdrop-blur-sm rounded-2xl border-2 border-dashed border-border/60">
-                  <div className="w-20 h-20 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                    <Search className="w-10 h-10 text-primary" />
+                  <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-12 bg-card/30 backdrop-blur-sm rounded-2xl border-2 border-dashed border-border/60">
+                    <div className="w-20 h-20 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+                      <Search className="w-10 h-10 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">Aucun résultat pour le moment</h3>
+                    <p className="text-muted-foreground max-w-md">
+                      Utilisez le formulaire ci-dessus pour lancer une recherche et découvrir des commerces dans votre zone cible
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">Aucun résultat pour le moment</h3>
-                  <p className="text-muted-foreground max-w-md">
-                    Utilisez le formulaire ci-dessus pour lancer une recherche et découvrir des commerces dans votre zone cible
-                  </p>
-                </div>
-              )}
+                )}
 
-              {results.length > 0 && (
-                <div className="bg-card rounded-2xl border-2 border-border card-elevated hover:card-elevated-hover transition-shadow overflow-hidden">
-                  <div className="p-6 border-b-2 border-border bg-card/50">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground">Résultats de la recherche</h3>
-                        <p className="text-sm text-muted-foreground mt-1">{results.length} établissements trouvés</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button onClick={handleExportCSV} variant="outline" size="sm">
-                          <Download className="w-4 h-4 mr-2" />
-                          Export CSV
-                        </Button>
-                        <Button onClick={handleExportToSheets} variant="default" size="sm">
-                          <Download className="w-4 h-4 mr-2" />
-                          Google Sheets
-                        </Button>
+                {results.length > 0 && (
+                  <div className="bg-card rounded-2xl border-2 border-border card-elevated hover:card-elevated-hover transition-shadow overflow-hidden">
+                    <div className="p-6 border-b-2 border-border bg-card/50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground">Résultats de la recherche</h3>
+                          <p className="text-sm text-muted-foreground mt-1">{results.length} établissements trouvés</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button onClick={handleExportCSV} variant="outline" size="sm">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export CSV
+                          </Button>
+                          <Button onClick={handleExportToSheets} variant="default" size="sm">
+                            <Download className="w-4 h-4 mr-2" />
+                            Google Sheets
+                          </Button>
+                        </div>
                       </div>
                     </div>
+                    <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
                   </div>
-                  <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
-                </div>
-              )}
+                )}
               </div>
             </div>
 
