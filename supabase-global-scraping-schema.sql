@@ -249,30 +249,36 @@ ALTER TABLE user_credits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE global_businesses ENABLE ROW LEVEL SECURITY;
 
 -- Policies for user_searches
+DROP POLICY IF EXISTS "Users can view own searches" ON user_searches;
 CREATE POLICY "Users can view own searches"
   ON user_searches FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own searches" ON user_searches;
 CREATE POLICY "Users can insert own searches"
   ON user_searches FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Policies for scraping_jobs
+DROP POLICY IF EXISTS "Users can view own jobs" ON scraping_jobs;
 CREATE POLICY "Users can view own jobs"
   ON scraping_jobs FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own jobs" ON scraping_jobs;
 CREATE POLICY "Users can insert own jobs"
   ON scraping_jobs FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Policies for global_businesses (read-only)
+DROP POLICY IF EXISTS "Authenticated users can read businesses" ON global_businesses;
 CREATE POLICY "Authenticated users can read businesses"
   ON global_businesses FOR SELECT
   TO authenticated
   USING (true);
 
 -- Policies for user_credits
+DROP POLICY IF EXISTS "Users can view own credits" ON user_credits;
 CREATE POLICY "Users can view own credits"
   ON user_credits FOR SELECT
   USING (auth.uid() = user_id);
@@ -286,10 +292,14 @@ CREATE OR REPLACE FUNCTION create_user_credits()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO user_credits (user_id, credits_remaining, credits_total)
-  VALUES (NEW.id, 100, 100);
+  VALUES (NEW.id, 100, 100)
+  ON CONFLICT (user_id) DO NOTHING;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Drop trigger if exists and recreate
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
