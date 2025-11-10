@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { consumeCredits, calculateScrapingCost } from "@/lib/credits"
 
 const PLACE_API_KEY = process.env.PLACE_API_KEY
 const SUPABASE_URL = process.env.SUPABASE_URL!
@@ -15,6 +16,24 @@ export async function POST(request: NextRequest) {
 
     if (!location || !location.lat || !location.lng) {
       return NextResponse.json({ error: "Location is required" }, { status: 400 })
+    }
+
+    // Calculer le coût en crédits
+    const cost = calculateScrapingCost({
+      radius: radius || 5000,
+      includeContactData,
+      useEnrichment: false,
+    })
+
+    // Vérifier et consommer les crédits
+    if (userId) {
+      const success = await consumeCredits(userId, cost)
+      if (!success) {
+        return NextResponse.json(
+          { error: "Crédits insuffisants", requiredCredits: cost },
+          { status: 402 } // Payment Required
+        )
+      }
     }
 
     // Initialize Supabase client

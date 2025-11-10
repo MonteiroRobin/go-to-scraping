@@ -7,9 +7,12 @@ import { Button } from "./ui/button"
 
 interface ResultsGridProps {
   results: Business[]
+  onEnrichAll?: () => void
+  onEnrichSingle?: (businessId: string) => void
+  isEnriching?: boolean
 }
 
-export function ResultsGrid({ results }: ResultsGridProps) {
+export function ResultsGrid({ results, onEnrichAll, onEnrichSingle, isEnriching }: ResultsGridProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const copyToClipboard = useCallback(async (text: string, id: string) => {
@@ -23,7 +26,7 @@ export function ResultsGrid({ results }: ResultsGridProps) {
       {results.map((business) => (
         <div
           key={business.id}
-          className="group bg-card rounded-xl border-2 border-border hover:border-primary/50 transition-all duration-300 overflow-hidden hover:shadow-xl flex flex-col"
+          className="group bg-card rounded border-2 border-border hover:border-primary/50 transition-all duration-300 overflow-hidden hover:shadow-xl flex flex-col"
         >
           {/* Image Header */}
           <div className="relative h-40 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent overflow-hidden">
@@ -39,9 +42,8 @@ export function ResultsGrid({ results }: ResultsGridProps) {
               </div>
             )}
             {business.rating && (
-              <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                <span className="text-sm font-semibold text-foreground">{business.rating.toFixed(1)}</span>
+              <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1">
+                <span className="text-sm font-semibold text-foreground">{business.rating.toFixed(1)}/5</span>
                 {business.user_ratings_total && (
                   <span className="text-xs text-muted-foreground">({business.user_ratings_total})</span>
                 )}

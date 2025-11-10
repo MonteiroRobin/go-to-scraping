@@ -8,7 +8,8 @@ import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { Fish, Lock, Mail, Sparkles, ArrowLeft } from "lucide-react"
+import { Lock, Mail, Sparkles, ArrowLeft } from "lucide-react"
+import Image from "next/image"
 import { ShimmerText } from "@/components/ui/shimmer-text"
 import { BlurFade } from "@/components/ui/blur-fade"
 import dynamic from "next/dynamic"
@@ -63,8 +64,8 @@ export default function LoginPage() {
               {/* Logo avec animation */}
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-foreground/10 via-foreground/5 to-transparent rounded-2xl blur-xl animate-pulse" />
-                <div className="relative w-20 h-20 rounded-xl bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg">
-                  <Fish className="w-10 h-10 text-foreground" strokeWidth={1.5} />
+                <div className="relative w-20 h-20 rounded-xl bg-card/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg p-3">
+                  <Image src="/hamecon-edited.svg" alt="Logo" width={40} height={40} className="w-full h-full" />
                 </div>
               </div>
 
@@ -142,7 +143,7 @@ export default function LoginPage() {
                     </>
                   ) : (
                     <>
-                      <Fish className="w-4 h-4 mr-2" />
+                      <Image src="/hamecon-edited.svg" alt="Hook" width={16} height={16} className="w-4 h-4 mr-2" />
                       Accéder au scraper
                     </>
                   )}

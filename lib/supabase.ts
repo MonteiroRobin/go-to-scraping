@@ -35,7 +35,7 @@ export interface SearchHistoryEntry {
   city: string
   business_type: string
   keywords: string | null
-  results_count: number
+  result_count: number
   created_at: string
 }
 
@@ -55,7 +55,7 @@ export async function saveSearchHistory(
       city,
       business_type: businessType,
       keywords,
-      results_count: resultsCount,
+      result_count: resultsCount,
       created_at: new Date().toISOString(),
     }
 
@@ -65,13 +65,13 @@ export async function saveSearchHistory(
   }
 
   const { data, error } = await supabase
-    .from("search_history")
+    .from("user_searches")
     .insert({
       user_id: userId,
       city,
       business_type: businessType,
       keywords,
-      results_count: resultsCount,
+      result_count: resultsCount,
     })
     .select()
     .single()
@@ -93,7 +93,7 @@ export async function getSearchHistory(userId: string): Promise<SearchHistoryEnt
   }
 
   const { data, error } = await supabase
-    .from("search_history")
+    .from("user_searches")
     .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -116,7 +116,7 @@ export async function deleteSearchHistory(historyIds: string[]) {
     return
   }
 
-  const { error } = await supabase.from("search_history").delete().in("id", historyIds)
+  const { error } = await supabase.from("user_searches").delete().in("id", historyIds)
 
   if (error) {
     console.error("[v0] Error deleting search history:", error)

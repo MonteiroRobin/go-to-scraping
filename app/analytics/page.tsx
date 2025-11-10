@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { Fish, TrendingUp, Target, MapPin, Sparkles, Users, Package, Anchor } from "lucide-react"
+import { TrendingUp, Target, MapPin, Sparkles, Users, Package, Anchor } from "lucide-react"
+import Image from "next/image"
 import { ShimmerText } from "@/components/ui/shimmer-text"
 import { NumberTicker } from "@/components/ui/number-ticker"
 import { BlurFade } from "@/components/ui/blur-fade"
@@ -102,7 +103,7 @@ export default function AnalyticsPage() {
           </div>
           <Link href="/scraper">
             <Button variant="ghost" size="sm">
-              <Fish className="w-4 h-4 mr-2" />
+              <Image src="/hamecon-edited.svg" alt="Hook" width={16} height={16} className="w-4 h-4 mr-2" />
               Retour au scraper
             </Button>
           </Link>
@@ -152,7 +153,7 @@ export default function AnalyticsPage() {
                 <BlurFade delay={0.4} inView>
                   <div className="rounded border border-border/50 bg-card/40 p-6">
                     <div className="flex items-center gap-3 mb-2">
-                      <Fish className="w-5 h-5 text-muted-foreground" />
+                      <Image src="/hamecon-edited.svg" alt="Hook" width={20} height={20} className="w-5 h-5" />
                       <span className="text-sm text-muted-foreground">Leads pêchés</span>
                     </div>
                     <div className="text-3xl font-bold">

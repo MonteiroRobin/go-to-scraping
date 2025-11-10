@@ -7,10 +7,8 @@ import {
   Check,
   Download,
   FileSpreadsheet,
-  Sparkles,
   ChevronDown,
   ChevronUp,
-  Star,
   Clock,
   Users,
   Zap,
@@ -26,6 +24,9 @@ interface ResultsListProps {
   results: Business[]
   onExportCSV?: () => void
   onExportSheets?: () => void
+  onEnrichAll?: () => void
+  onEnrichSingle?: (businessId: string) => void
+  isEnriching?: boolean
 }
 
 const ResultRow = memo(
@@ -72,7 +73,9 @@ const ResultRow = memo(
               <div className="flex items-center gap-2">
                 <span className="font-medium">{business.name}</span>
                 {hasEnrichedData && (
-                  <Sparkles className="w-3.5 h-3.5 text-primary" title="Enrichi par Grok AI" />
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium" title="Enrichi par Grok AI">
+                    AI
+                  </span>
                 )}
               </div>
               <button
@@ -199,8 +202,7 @@ const ResultRow = memo(
           <td className="px-4 py-3 text-sm border-r border-border">
             {business.rating ? (
               <div className="flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                <span className="font-medium text-foreground">{business.rating.toFixed(1)}</span>
+                <span className="font-medium text-foreground">{business.rating.toFixed(1)}/5</span>
                 {business.user_ratings_total && (
                   <span className="text-xs text-muted-foreground">({business.user_ratings_total})</span>
                 )}
@@ -255,9 +257,9 @@ const ResultRow = memo(
             <td colSpan={9} className="px-4 py-4">
               <div className="space-y-4 max-w-5xl">
                 <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-xs px-2 py-1 rounded bg-primary/10 text-primary font-medium">GROK AI</span>
                   <span className="text-sm font-semibold text-foreground">
-                    Données enrichies par Grok AI
+                    Données enrichies
                   </span>
                 </div>
 
@@ -479,8 +481,7 @@ export function ResultsList({ results, onExportCSV, onExportSheets }: ResultsLis
               <div className="flex items-center gap-3">
                 <p className="text-xs text-muted-foreground">Exportez vos données en un clic</p>
                 {enrichedCount > 0 && (
-                  <div className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded-full border border-border">
-                    <Sparkles className="w-3 h-3 text-foreground" />
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded border border-border">
                     <span className="text-xs text-foreground font-medium">
                       {enrichedCount} enrichi{enrichedCount > 1 ? "s" : ""} par Grok AI
                     </span>
