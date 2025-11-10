@@ -1,16 +1,21 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { Fish, Anchor, Target, ChevronDown, Sparkles, Waves, Loader2, Download, LayoutGrid } from "lucide-react"
+import { Fish, Anchor, Target, ChevronDown, Sparkles, Waves, Loader2, Download, LayoutGrid, List, Filter, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ShimmerText } from "@/components/ui/shimmer-text"
 import { NumberTicker } from "@/components/ui/number-ticker"
 import { MapComponent } from "@/components/map-component"
 import { ResultsGrid } from "@/components/results-grid"
+import { ResultsList } from "@/components/results-list"
 import { EmptyStateScraper } from "@/components/empty-state-scraper"
+import { FiltersPanel, type FilterOptions } from "@/components/filters-panel"
+import { ScrapingStats } from "@/components/scraping-stats"
+import { HistoryView } from "@/components/history-view"
+import { Badge } from "@/components/ui/badge"
 import dynamic from "next/dynamic"
 
 const FloatingDots = dynamic(() => import("@/components/InteractiveGrid").then((mod) => ({ default: mod.FloatingDots })), {
@@ -30,9 +35,12 @@ export interface Business {
   rating?: number
   user_ratings_total?: number
   category?: string
+  enriched?: boolean
+  price_level?: number
 }
 
 type ViewMode = "search" | "map" | "history"
+type ResultsViewMode = "grid" | "list"
 
 export default function ScraperPage() {
   const { user, isLoading, logout } = useAuth()
@@ -51,11 +59,63 @@ export default function ScraperPage() {
     west: number
   } | null>(null)
 
+  // Results display options
+  const [resultsViewMode, setResultsViewMode] = useState<ResultsViewMode>("grid")
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState<FilterOptions>({})
+
+  // Stats
+  const [newCount, setNewCount] = useState(0)
+  const [duplicateCount, setDuplicateCount] = useState(0)
+
+  // Enrichment
+  const [isEnriching, setIsEnriching] = useState(false)
+  const [enrichmentProgress, setEnrichmentProgress] = useState({ current: 0, total: 0 })
+
   useEffect(() => {
     if (!isLoading && !user) {
       router.push("/login")
     }
   }, [user, isLoading, router])
+
+  // Filtered results
+  const filteredResults = useMemo(() => {
+    let filtered = [...results]
+
+    if (filters.minRating) {
+      filtered = filtered.filter((b) => (b.rating || 0) >= filters.minRating!)
+    }
+
+    if (filters.hasWebsite) {
+      filtered = filtered.filter((b) => b.website && b.website !== "Non disponible")
+    }
+
+    if (filters.hasPhone) {
+      filtered = filtered.filter((b) => b.phone && b.phone !== "Non disponible")
+    }
+
+    if (filters.hasEmail) {
+      filtered = filtered.filter((b) => b.email && b.email !== "Non disponible")
+    }
+
+    if (filters.priceLevel && filters.priceLevel.length > 0) {
+      filtered = filtered.filter((b) => b.price_level && filters.priceLevel!.includes(b.price_level))
+    }
+
+    if (filters.sortBy) {
+      filtered.sort((a, b) => {
+        let comparison = 0
+        if (filters.sortBy === "name") {
+          comparison = a.name.localeCompare(b.name)
+        } else if (filters.sortBy === "rating") {
+          comparison = (b.rating || 0) - (a.rating || 0)
+        }
+        return filters.sortOrder === "asc" ? comparison : -comparison
+      })
+    }
+
+    return filtered
+  }, [results, filters])
 
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return
@@ -64,7 +124,6 @@ export default function ScraperPage() {
     setViewMode("search")
 
     try {
-      // Parse query like "café Paris" or "restaurant à Lyon"
       const lowerQuery = searchQuery.toLowerCase()
       const parts = lowerQuery.split(/\s+(?:à|a)\s+/)
 
@@ -77,7 +136,6 @@ export default function ScraperPage() {
       } else {
         const words = searchQuery.trim().split(/\s+/)
         if (words.length >= 2) {
-          // Try to detect if first or last word is a city
           const lastWord = words[words.length - 1]
           const cities = ["paris", "lyon", "marseille", "toulouse", "nice", "nantes", "bordeaux", "lille", "dijon"]
 
@@ -90,11 +148,10 @@ export default function ScraperPage() {
           }
         } else {
           businessType = searchQuery
-          city = "Paris" // Default city
+          city = "Paris"
         }
       }
 
-      // Step 1: Geocode the city to get coordinates
       const geocodeResponse = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city + ", France")}&format=json&limit=1`,
         {
@@ -117,19 +174,17 @@ export default function ScraperPage() {
         lng: parseFloat(geocodeData[0].lon),
       }
 
-      // Set map center immediately
       setMapCenter({
         lat: location.lat,
         lon: location.lng,
       })
 
-      // Step 2: Call Google Places API with coordinates
       const response = await fetch("/api/scrape-places", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           location,
-          radius: 10000, // 10km radius
+          radius: 10000,
           type: businessType === "restaurant" ? "restaurant" : "establishment",
           keyword: businessType,
           userId: user?.id,
@@ -142,8 +197,12 @@ export default function ScraperPage() {
       if (data.businesses && data.businesses.length > 0) {
         setResults(data.businesses)
         setSearches(searches + 1)
+        setNewCount(data.newCount || 0)
+        setDuplicateCount(data.duplicateCount || 0)
       } else {
         setResults([])
+        setNewCount(0)
+        setDuplicateCount(0)
       }
     } catch (error) {
       console.error("Search error:", error)
@@ -158,11 +217,11 @@ export default function ScraperPage() {
   }
 
   const handleExport = useCallback(() => {
-    if (results.length === 0) return
+    if (filteredResults.length === 0) return
 
     const csv = [
       ["Nom", "Adresse", "Téléphone", "Site web", "Email", "Note", "Latitude", "Longitude"].join(","),
-      ...results.map((b) =>
+      ...filteredResults.map((b) =>
         [
           `"${b.name}"`,
           `"${b.address}"`,
@@ -182,7 +241,17 @@ export default function ScraperPage() {
     a.href = url
     a.download = `leads-${new Date().toISOString().split("T")[0]}.csv`
     a.click()
-  }, [results])
+  }, [filteredResults])
+
+  const handleEnrichAll = useCallback(() => {
+    // TODO: Implement Grok enrichment
+    console.log("Enrich all businesses")
+  }, [])
+
+  const handleEnrichSingle = useCallback((businessId: string) => {
+    // TODO: Implement single business enrichment
+    console.log("Enrich business:", businessId)
+  }, [])
 
   if (isLoading) {
     return (
@@ -200,9 +269,8 @@ export default function ScraperPage() {
     <div className="min-h-screen bg-background relative">
       <FloatingDots />
 
-      {/* Container centré avec max-width */}
       <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 py-4 sm:py-6">
-        {/* Header compact */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-6 sm:mb-8 pb-3 sm:pb-4 border-b border-border/50">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-foreground/5 flex items-center justify-center">
@@ -215,16 +283,20 @@ export default function ScraperPage() {
               <p className="text-[10px] sm:text-xs text-muted-foreground">Pro Dashboard</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-xs sm:text-sm">
-            Déconnexion
-          </Button>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Badge variant="outline" className="hidden sm:flex">
+              <NumberTicker value={credits} /> crédits
+            </Badge>
+            <Button variant="ghost" size="sm" onClick={logout} className="text-xs sm:text-sm">
+              Déconnexion
+            </Button>
+          </div>
         </div>
 
-        {/* Layout responsive */}
+        {/* Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-          {/* Sidebar gauche - cachée sur mobile */}
+          {/* Sidebar */}
           <aside className="hidden lg:block lg:col-span-3 space-y-4">
-            {/* Navigation */}
             <div className="rounded-xl border border-border/50 bg-card/40 p-4">
               <div className="space-y-1">
                 <Button
@@ -257,7 +329,6 @@ export default function ScraperPage() {
               </div>
             </div>
 
-            {/* Recherches populaires */}
             <div className="rounded-2xl border border-border/50 bg-card/40 p-4">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3">Recherches populaires</h3>
               <div className="space-y-1">
@@ -279,7 +350,6 @@ export default function ScraperPage() {
               </div>
             </div>
 
-            {/* Stats rapides */}
             <div className="rounded border border-border/50 bg-card/40 p-4">
               <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-3">Statistiques rapides</h3>
               <div className="space-y-3">
@@ -299,9 +369,9 @@ export default function ScraperPage() {
             </div>
           </aside>
 
-          {/* Zone principale */}
+          {/* Main */}
           <main className="lg:col-span-9 space-y-4 sm:space-y-6">
-            {/* Barre de recherche */}
+            {/* Search Bar */}
             <div className="rounded-xl border border-border/50 bg-card/40 p-4 sm:p-6">
               <h2 className="text-lg sm:text-xl font-bold mb-2">Nouvelle recherche</h2>
               <p className="text-xs sm:text-sm text-muted-foreground mb-4">
@@ -347,7 +417,6 @@ export default function ScraperPage() {
                 </Button>
               </div>
 
-              {/* Collapse explications */}
               <details className="mt-4 group">
                 <summary className="cursor-pointer flex items-center gap-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
                   <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 group-open:rotate-180 transition-transform" />
@@ -364,28 +433,91 @@ export default function ScraperPage() {
               </details>
             </div>
 
-            {/* Zone résultats/carte */}
-            {viewMode === "search" && results.length === 0 && (
+            {/* Stats Display */}
+            {results.length > 0 && (
+              <ScrapingStats
+                total={results.length}
+                newCount={newCount}
+                duplicateCount={duplicateCount}
+                isLoading={isSearching}
+                isEnriching={isEnriching}
+                progress={{ current: 0, total: 0 }}
+                enrichmentProgress={enrichmentProgress}
+              />
+            )}
+
+            {/* View Mode Content */}
+            {viewMode === "search" && results.length === 0 && !isSearching && (
               <EmptyStateScraper />
             )}
 
             {viewMode === "search" && results.length > 0 && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-base sm:text-lg font-semibold">
-                    {results.length} résultat{results.length > 1 ? "s" : ""}
+                    {filteredResults.length} résultat{filteredResults.length > 1 ? "s" : ""}
+                    {filteredResults.length !== results.length && ` sur ${results.length}`}
                   </h3>
-                  <Button variant="outline" size="sm" onClick={handleExport} className="text-xs sm:text-sm">
-                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                    Exporter CSV
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="text-xs sm:text-sm"
+                    >
+                      <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                      Filtres
+                      {showFilters && <X className="w-3 h-3 ml-2" />}
+                    </Button>
+                    <div className="flex items-center gap-1 border border-border rounded-lg p-1">
+                      <Button
+                        variant={resultsViewMode === "grid" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setResultsViewMode("grid")}
+                        className="h-7 w-7 p-0"
+                      >
+                        <LayoutGrid className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant={resultsViewMode === "list" ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setResultsViewMode("list")}
+                        className="h-7 w-7 p-0"
+                      >
+                        <List className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleExport} className="text-xs sm:text-sm">
+                      <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                      CSV
+                    </Button>
+                  </div>
                 </div>
-                <ResultsGrid
-                  results={results}
-                  onEnrichAll={() => {}}
-                  onEnrichSingle={() => {}}
-                  isEnriching={false}
-                />
+
+                {showFilters && (
+                  <FiltersPanel
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                    totalResults={results.length}
+                    filteredResults={filteredResults.length}
+                  />
+                )}
+
+                {resultsViewMode === "grid" ? (
+                  <ResultsGrid
+                    results={filteredResults}
+                    onEnrichAll={handleEnrichAll}
+                    onEnrichSingle={handleEnrichSingle}
+                    isEnriching={isEnriching}
+                  />
+                ) : (
+                  <ResultsList
+                    results={filteredResults}
+                    onEnrichAll={handleEnrichAll}
+                    onEnrichSingle={handleEnrichSingle}
+                    isEnriching={isEnriching}
+                  />
+                )}
               </div>
             )}
 
@@ -399,6 +531,12 @@ export default function ScraperPage() {
                     onZoneSelected={handleZoneSelected}
                   />
                 </div>
+              </div>
+            )}
+
+            {viewMode === "history" && (
+              <div className="rounded-xl border border-border/50 bg-card/40 p-4">
+                <HistoryView userId={user?.id} onLoadHistory={(businesses) => setResults(businesses)} />
               </div>
             )}
           </main>
