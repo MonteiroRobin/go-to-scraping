@@ -250,4 +250,55 @@
   .direction-reverse {
     animation-direction: reverse;
   }
+
+  /* Enhanced button textures and depth */
+  .btn-texture {
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-texture-primary {
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.2),
+      0 2px 4px 0 rgba(22, 163, 74, 0.15),
+      0 4px 8px 0 rgba(22, 163, 74, 0.1);
+  }
+
+  .btn-texture-hover {
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+      0 3px 6px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  /* Card depth effects */
+  .card-elevated {
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.05),
+      0 2px 4px rgba(0, 0, 0, 0.05),
+      0 12px 24px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-elevated-hover {
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.08),
+      0 4px 8px rgba(0, 0, 0, 0.08),
+      0 16px 32px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Input depth */
+  .input-depth {
+    box-shadow:
+      inset 0 1px 2px 0 rgba(0, 0, 0, 0.05),
+      0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+
+  .input-depth-focus {
+    box-shadow:
+      inset 0 1px 2px 0 rgba(22, 163, 74, 0.1),
+      0 0 0 2px rgba(22, 163, 74, 0.2);
+  }
 }

@@ -873,7 +873,7 @@ export function ScraperInterface() {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-card/30 backdrop-blur-xl">
+      <aside className="hidden lg:flex flex-col w-64 border-r-2 border-border bg-card/30 backdrop-blur-xl card-elevated">
         <div className="p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -915,8 +915,8 @@ export function ScraperInterface() {
 
         <div className="p-4 border-t border-border space-y-3">
           {user && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border-2 border-primary/20 btn-texture">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
                 <p className="text-xs text-muted-foreground">Connecté</p>
@@ -1165,8 +1165,8 @@ export function ScraperInterface() {
               )}
 
               {results.length > 0 && (
-                <div className="bg-card rounded-2xl border border-border shadow-lg overflow-hidden">
-                  <div className="p-6 border-b border-border bg-card/50">
+                <div className="bg-card rounded-2xl border-2 border-border card-elevated hover:card-elevated-hover transition-shadow overflow-hidden">
+                  <div className="p-6 border-b-2 border-border bg-card/50">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="text-lg font-semibold text-foreground">Résultats de la recherche</h3>
@@ -1232,8 +1232,8 @@ export function ScraperInterface() {
             )}
 
               {results.length > 0 && (
-                <div className="mt-6 bg-card rounded-2xl border border-border shadow-lg overflow-hidden">
-                  <div className="p-6 border-b border-border bg-card/50">
+                <div className="mt-6 bg-card rounded-2xl border-2 border-border card-elevated hover:card-elevated-hover transition-shadow overflow-hidden">
+                  <div className="p-6 border-b-2 border-border bg-card/50">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="text-lg font-semibold text-foreground">Résultats de la zone</h3>
