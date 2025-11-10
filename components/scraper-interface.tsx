@@ -871,78 +871,134 @@ export function ScraperInterface() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
-      <header className="sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl bg-background/80 shadow-sm transition-all duration-300">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-4 max-w-[1600px] mx-auto">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-              <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
-                Go To Scraping
-              </h1>
-              {user && (
-                <div className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/5 rounded-full border border-primary/20 transition-all duration-300 hover:bg-primary/10">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/30" />
-                  <span className="text-xs sm:text-sm font-medium text-primary truncate max-w-[150px]">{user.name}</span>
-                </div>
-              )}
+    <div className="min-h-screen flex bg-background">
+      {/* Sidebar */}
+      <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-card/30 backdrop-blur-xl">
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Search className="w-5 h-5 text-primary" />
             </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <ThemeToggle />
-              <Button
-                onClick={logout}
-                variant="ghost"
-                size="sm"
-                className="gap-2 text-foreground transition-colors duration-200"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Déconnexion</span>
-              </Button>
+            <div>
+              <h1 className="text-lg font-semibold text-foreground">Go To Scraping</h1>
+              <p className="text-xs text-muted-foreground">Pro Dashboard</p>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <Button
-              onClick={() => setViewMode("search")}
-              variant={viewMode === "search" ? "default" : "ghost"}
-              className="gap-1.5 sm:gap-2 transition-all duration-200 text-xs sm:text-sm"
-            >
-              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Recherche</span>
-            </Button>
-            <Button
-              onClick={() => setViewMode("map")}
-              variant={viewMode === "map" ? "default" : "ghost"}
-              className="gap-1.5 sm:gap-2 transition-all duration-200 text-xs sm:text-sm"
-            >
-              <Map className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Carte</span>
-            </Button>
-            <Button
-              onClick={() => setViewMode("history")}
-              variant={viewMode === "history" ? "default" : "ghost"}
-              className="gap-1.5 sm:gap-2 transition-all duration-200 text-xs sm:text-sm"
-            >
-              <History className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Historique</span>
+        <nav className="flex-1 p-4 space-y-1">
+          <Button
+            onClick={() => setViewMode("search")}
+            variant={viewMode === "search" ? "default" : "ghost"}
+            className="w-full justify-start gap-3 h-11"
+          >
+            <Search className="w-4 h-4" />
+            <span>Recherche</span>
+          </Button>
+          <Button
+            onClick={() => setViewMode("map")}
+            variant={viewMode === "map" ? "default" : "ghost"}
+            className="w-full justify-start gap-3 h-11"
+          >
+            <Map className="w-4 h-4" />
+            <span>Carte & Zones</span>
+          </Button>
+          <Button
+            onClick={() => setViewMode("history")}
+            variant={viewMode === "history" ? "default" : "ghost"}
+            className="w-full justify-start gap-3 h-11"
+          >
+            <History className="w-4 h-4" />
+            <span>Historique</span>
+          </Button>
+        </nav>
+
+        <div className="p-4 border-t border-border space-y-3">
+          {user && (
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                <p className="text-xs text-muted-foreground">Connecté</p>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button onClick={logout} variant="ghost" size="sm" className="flex-1 gap-2">
+              <LogOut className="w-4 h-4" />
+              Déconnexion
             </Button>
           </div>
         </div>
-      </header>
+      </aside>
+
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 border-b border-border backdrop-blur-xl bg-background/80">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-semibold">Go To Scraping</h1>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button onClick={logout} variant="ghost" size="sm">
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="px-4 pb-3 grid grid-cols-3 gap-2">
+          <Button
+            onClick={() => setViewMode("search")}
+            variant={viewMode === "search" ? "default" : "ghost"}
+            size="sm"
+          >
+            <Search className="w-4 h-4 mr-1" />
+            Recherche
+          </Button>
+          <Button
+            onClick={() => setViewMode("map")}
+            variant={viewMode === "map" ? "default" : "ghost"}
+            size="sm"
+          >
+            <Map className="w-4 h-4 mr-1" />
+            Carte
+          </Button>
+          <Button
+            onClick={() => setViewMode("history")}
+            variant={viewMode === "history" ? "default" : "ghost"}
+            size="sm"
+          >
+            <History className="w-4 h-4 mr-1" />
+            Historique
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col lg:mt-0 mt-28">
 
       {viewMode === "history" ? (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
-          <HistoryView
-            onSearch={(city, businessType, keywords) => {
-              setViewMode("search")
-              handleSearch(city, businessType, { keywords })
-            }}
-          />
+        <div className="p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold text-foreground">Historique des recherches</h2>
+              <p className="text-sm text-muted-foreground mt-1">Retrouvez toutes vos recherches précédentes</p>
+            </div>
+            <HistoryView
+              onSearch={(city, businessType, keywords) => {
+                setViewMode("search")
+                handleSearch(city, businessType, { keywords })
+              }}
+            />
+          </div>
         </div>
       ) : viewMode === "search" ? (
         <>
-          <div className="border-b border-border/50 bg-card/30 backdrop-blur-xl shadow-sm transition-all duration-300">
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1600px] mx-auto">
+          {/* Search Header */}
+          <div className="border-b border-border bg-card/50 backdrop-blur-sm">
+            <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold text-foreground">Nouvelle recherche</h2>
+                <p className="text-sm text-muted-foreground mt-1">Recherchez des commerces par ville et type d'établissement</p>
+              </div>
               <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
 
               <div className="mt-6">
@@ -1093,39 +1149,58 @@ export function ScraperInterface() {
             </div>
           )}
 
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
-            {results.length === 0 && !isLoading && (
-              <div className="text-center p-8 sm:p-12 bg-card/40 backdrop-blur-sm rounded-2xl border border-dashed border-border/60 shadow-sm transition-all duration-300 hover:border-primary/30">
-                <div className="max-w-md mx-auto space-y-3">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center transition-colors duration-300">
-                    <Search className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+          {/* Results Section */}
+          <div className="flex-1 p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              {results.length === 0 && !isLoading && (
+                <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-12 bg-card/30 backdrop-blur-sm rounded-2xl border-2 border-dashed border-border/60">
+                  <div className="w-20 h-20 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+                    <Search className="w-10 h-10 text-primary" />
                   </div>
-                  <p className="text-sm sm:text-base text-foreground font-medium">Commencez votre recherche</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    Entrez une ville et un type de commerce, puis cliquez sur "Rechercher"
+                  <h3 className="text-xl font-semibold text-foreground mb-2">Aucun résultat pour le moment</h3>
+                  <p className="text-muted-foreground max-w-md">
+                    Utilisez le formulaire ci-dessus pour lancer une recherche et découvrir des commerces dans votre zone cible
                   </p>
                 </div>
-              </div>
-            )}
+              )}
 
-            {results.length > 0 && (
-              <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 shadow-xl bg-card/80 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
-                <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
-              </div>
-            )}
+              {results.length > 0 && (
+                <div className="bg-card rounded-2xl border border-border shadow-lg overflow-hidden">
+                  <div className="p-6 border-b border-border bg-card/50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">Résultats de la recherche</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{results.length} établissements trouvés</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleExportCSV} variant="outline" size="sm">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export CSV
+                        </Button>
+                        <Button onClick={handleExportToSheets} variant="default" size="sm">
+                          <Download className="w-4 h-4 mr-2" />
+                          Google Sheets
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
+                </div>
+              )}
+            </div>
           </div>
         </>
       ) : (
         <>
           {/* Map View */}
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
-            <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/50 shadow-lg transition-all duration-300 hover:shadow-xl">
-              <h2 className="text-base sm:text-lg font-semibold text-foreground mb-2">Sélection par zone</h2>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Utilisez les outils de dessin pour sélectionner une zone sur la carte, puis cliquez sur "Confirmer" pour
-                scraper les commerces dans cette zone.
-              </p>
-            </div>
+          <div className="p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold text-foreground">Sélection par zone géographique</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Dessinez une zone sur la carte pour extraire tous les commerces de cette région
+                </p>
+              </div>
 
             <div
               className="rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 shadow-2xl transition-all duration-300 hover:shadow-[0_20px_50px_rgba(22,163,74,0.15)]"
@@ -1156,14 +1231,34 @@ export function ScraperInterface() {
               </div>
             )}
 
-            {results.length > 0 && (
-              <div className="mt-4 sm:mt-6 rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 shadow-xl bg-card/80 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
-                <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
-              </div>
-            )}
+              {results.length > 0 && (
+                <div className="mt-6 bg-card rounded-2xl border border-border shadow-lg overflow-hidden">
+                  <div className="p-6 border-b border-border bg-card/50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">Résultats de la zone</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{results.length} établissements trouvés</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleExportCSV} variant="outline" size="sm">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export CSV
+                        </Button>
+                        <Button onClick={handleExportToSheets} variant="default" size="sm">
+                          <Download className="w-4 h-4 mr-2" />
+                          Google Sheets
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
+                </div>
+              )}
+            </div>
           </div>
         </>
       )}
+      </main>
     </div>
   )
 }

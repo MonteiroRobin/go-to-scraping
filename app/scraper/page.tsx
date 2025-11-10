@@ -30,12 +30,17 @@ export default function ScraperPage() {
   }
 
   return (
-    <div className="space-y-0">
-      <div className="container mx-auto px-4 pt-4">
-        <DatabaseTest />
-      </div>
+    <>
       <ScraperInterface />
-      <SetupGuide />
-    </div>
+      <footer className="fixed bottom-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-t border-border">
+        <div className="px-4 py-2 flex items-center justify-between text-xs text-muted-foreground">
+          <span>© 2025 Go To Scraping</span>
+          <div className="flex items-center gap-4">
+            <DatabaseTest />
+            <span className="hidden sm:inline">Powered by Go To Agency</span>
+          </div>
+        </div>
+      </footer>
+    </>
   )
 }
