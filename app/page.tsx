@@ -22,6 +22,10 @@ import { MapBackground } from "@/components/MapBackground"
 import { SpreadsheetPreview } from "@/components/SpreadsheetPreview"
 import { ShimmerText as MagicShimmer } from "@/components/ui/shimmer-text"
 import { WordRotate } from "@/components/ui/word-rotate"
+import { BlurFade } from "@/components/ui/blur-fade"
+import { NumberTicker } from "@/components/ui/number-ticker"
+import { Spotlight } from "@/components/ui/spotlight"
+import { Marquee } from "@/components/ui/marquee"
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth()
@@ -54,6 +58,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden relative">
+      <Spotlight className="hidden md:block" />
       <MapBackground />
       <OrganizationJsonLd />
       <SoftwareApplicationJsonLd />
@@ -170,17 +175,49 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                <span>Rejoignez +500 utilisateurs en liste d'attente</span>
-              </p>
+              <BlurFade delay={0.3} inView>
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  <span>Rejoignez +<NumberTicker value={500} />+ utilisateurs en liste d'attente</span>
+                </p>
+              </BlurFade>
             </div>
           </RevealOnScroll>
         </section>
 
+        {/* Marquee Section */}
+        <section className="py-12 border-t border-border/50 bg-secondary/30 relative overflow-hidden">
+          <BlurFade delay={0.1} inView>
+            <div className="mb-8 text-center">
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                Fonctionnalités clés
+              </p>
+            </div>
+          </BlurFade>
+          <Marquee pauseOnHover className="[--duration:30s]">
+            {[
+              "🎯 Ciblage géographique précis",
+              "⚡ Scraping temps réel",
+              "📊 Export CSV & Google Sheets",
+              "🔍 Recherche intelligente",
+              "🗺️ Sélection par zone",
+              "💾 Sauvegarde automatique",
+              "🌐 Données Google Maps",
+              "🚀 Interface intuitive",
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 px-6 py-3 mx-3 bg-card/60 backdrop-blur-sm rounded-full border border-border/50 text-sm font-medium whitespace-nowrap shadow-sm hover:shadow-md transition-shadow"
+              >
+                {feature}
+              </div>
+            ))}
+          </Marquee>
+        </section>
+
         <ParallaxSection speed={0.2} className="py-32 border-t border-border relative z-0">
           <div className="grid md:grid-cols-3 gap-8">
-            <RevealOnScroll delay={0}>
+            <BlurFade delay={0.2} inView>
               <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
                   <Search className="w-7 h-7 text-primary" strokeWidth={2} />
@@ -192,9 +229,9 @@ export default function HomePage() {
                   Tapez "café Paris" et récupérez automatiquement tous les établissements de la ville
                 </p>
               </div>
-            </RevealOnScroll>
+            </BlurFade>
 
-            <RevealOnScroll delay={100}>
+            <BlurFade delay={0.3} inView>
               <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
                   <MapPin className="w-7 h-7 text-primary" strokeWidth={2} />
@@ -206,9 +243,9 @@ export default function HomePage() {
                   Dessinez un rectangle sur la carte pour cibler précisément une zone géographique
                 </p>
               </div>
-            </RevealOnScroll>
+            </BlurFade>
 
-            <RevealOnScroll delay={200}>
+            <BlurFade delay={0.4} inView>
               <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
                   <Download className="w-7 h-7 text-primary" strokeWidth={2} />
@@ -220,7 +257,7 @@ export default function HomePage() {
                   Exportez vos données en CSV ou copiez-les directement dans Google Sheets
                 </p>
               </div>
-            </RevealOnScroll>
+            </BlurFade>
           </div>
         </ParallaxSection>
 
