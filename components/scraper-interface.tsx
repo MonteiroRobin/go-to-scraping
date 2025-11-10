@@ -87,7 +87,7 @@ export function ScraperInterface() {
 
     return (
       <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-6 bg-white dark:bg-card rounded-xl sm:rounded-2xl border border-border shadow-lg transition-all duration-300">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-6 bg-card/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-border/50 shadow-lg transition-all duration-300 hover:shadow-xl hover:bg-card/90">
           <div className="flex flex-wrap items-center gap-3 sm:gap-6 w-full">
             <div className="flex-shrink-0">
               <div className="text-2xl sm:text-4xl font-bold text-foreground">
@@ -871,8 +871,8 @@ export function ScraperInterface() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-300">
-      <header className="sticky top-0 z-50 border-b border-border backdrop-blur-md bg-white/60 dark:bg-black/60 transition-all duration-300">
+    <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
+      <header className="sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl bg-background/80 shadow-sm transition-all duration-300">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-4 max-w-[1600px] mx-auto">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
             <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
@@ -880,9 +880,9 @@ export function ScraperInterface() {
                 Go To Scraping
               </h1>
               {user && (
-                <div className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/10 rounded-full border border-border transition-colors duration-300">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
-                  <span className="text-xs sm:text-sm font-medium text-foreground truncate max-w-[150px]">{user.name}</span>
+                <div className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/5 rounded-full border border-primary/20 transition-all duration-300 hover:bg-primary/10">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/30" />
+                  <span className="text-xs sm:text-sm font-medium text-primary truncate max-w-[150px]">{user.name}</span>
                 </div>
               )}
             </div>
@@ -941,7 +941,7 @@ export function ScraperInterface() {
         </div>
       ) : viewMode === "search" ? (
         <>
-          <div className="border-b border-border bg-white/80 dark:bg-black/80 backdrop-blur-sm shadow-sm transition-all duration-300">
+          <div className="border-b border-border/50 bg-card/30 backdrop-blur-xl shadow-sm transition-all duration-300">
             <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1600px] mx-auto">
               <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
 
@@ -963,7 +963,7 @@ export function ScraperInterface() {
                 </Button>
 
                 {showExplanation && (
-                  <div className="mt-4 p-6 bg-white dark:bg-card rounded-xl border border-border shadow-lg space-y-4 transition-all duration-300">
+                  <div className="mt-4 p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/50 shadow-lg space-y-4 transition-all duration-300">
                     <div>
                       <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
                         <div className="w-2 h-2 bg-primary rounded-full" />
@@ -1015,7 +1015,7 @@ export function ScraperInterface() {
               {statsDisplay}
 
               {showGrokPrompt && canEnrich && !isEnriching && (
-                <div className="mt-6 p-6 bg-secondary rounded-xl border border-border shadow-lg">
+                <div className="mt-6 p-6 bg-gradient-to-br from-primary/5 via-primary/10 to-accent/20 backdrop-blur-sm rounded-xl border border-primary/30 shadow-lg transition-all duration-300 hover:shadow-xl">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                       <Sparkles className="w-6 h-6 text-primary-foreground" />
@@ -1057,7 +1057,7 @@ export function ScraperInterface() {
           </div>
 
           {(isLoading || isEnriching) && (
-            <div className="bg-secondary border-b border-border transition-all duration-300">
+            <div className="bg-secondary/50 backdrop-blur-sm border-b border-border/50 transition-all duration-300">
               <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center gap-3">
                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -1095,7 +1095,7 @@ export function ScraperInterface() {
 
           <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
             {results.length === 0 && !isLoading && (
-              <div className="text-center p-8 sm:p-12 bg-white dark:bg-card rounded-2xl border border-dashed border-border shadow-sm transition-all duration-300">
+              <div className="text-center p-8 sm:p-12 bg-card/40 backdrop-blur-sm rounded-2xl border border-dashed border-border/60 shadow-sm transition-all duration-300 hover:border-primary/30">
                 <div className="max-w-md mx-auto space-y-3">
                   <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center transition-colors duration-300">
                     <Search className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
@@ -1109,7 +1109,7 @@ export function ScraperInterface() {
             )}
 
             {results.length > 0 && (
-              <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-border shadow-xl bg-white dark:bg-card transition-all duration-300">
+              <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 shadow-xl bg-card/80 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
                 <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
               </div>
             )}
@@ -1119,7 +1119,7 @@ export function ScraperInterface() {
         <>
           {/* Map View */}
           <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
-            <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-white dark:bg-card rounded-xl border border-border shadow-lg transition-all duration-300">
+            <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/50 shadow-lg transition-all duration-300 hover:shadow-xl">
               <h2 className="text-base sm:text-lg font-semibold text-foreground mb-2">Sélection par zone</h2>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 Utilisez les outils de dessin pour sélectionner une zone sur la carte, puis cliquez sur "Confirmer" pour
@@ -1128,7 +1128,7 @@ export function ScraperInterface() {
             </div>
 
             <div
-              className="rounded-xl sm:rounded-2xl overflow-hidden border border-border shadow-2xl transition-all duration-300"
+              className="rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 shadow-2xl transition-all duration-300 hover:shadow-[0_20px_50px_rgba(22,163,74,0.15)]"
               style={{ height: "500px", minHeight: "400px" }}
             >
               <MapComponent
@@ -1157,7 +1157,7 @@ export function ScraperInterface() {
             )}
 
             {results.length > 0 && (
-              <div className="mt-4 sm:mt-6 rounded-xl sm:rounded-2xl overflow-hidden border border-border shadow-xl bg-white dark:bg-card transition-all duration-300">
+              <div className="mt-4 sm:mt-6 rounded-xl sm:rounded-2xl overflow-hidden border border-border/50 shadow-xl bg-card/80 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
                 <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
               </div>
             )}
