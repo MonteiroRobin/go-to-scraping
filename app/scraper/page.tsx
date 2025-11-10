@@ -64,8 +64,10 @@ export default function ScraperPage() {
     setViewMode("search")
 
     try {
-      // Parse query like "café Paris"
-      const parts = searchQuery.toLowerCase().split(/\s+(?:à|a)\s+/)
+      // Parse query like "café Paris" or "restaurant à Lyon"
+      const lowerQuery = searchQuery.toLowerCase()
+      const parts = lowerQuery.split(/\s+(?:à|a)\s+/)
+
       let businessType = ""
       let city = ""
 
@@ -73,38 +75,79 @@ export default function ScraperPage() {
         businessType = parts[0].trim()
         city = parts[1].trim()
       } else {
-        const words = searchQuery.split(" ")
-        businessType = words[0]
-        city = words.slice(1).join(" ")
+        const words = searchQuery.trim().split(/\s+/)
+        if (words.length >= 2) {
+          // Try to detect if first or last word is a city
+          const lastWord = words[words.length - 1]
+          const cities = ["paris", "lyon", "marseille", "toulouse", "nice", "nantes", "bordeaux", "lille", "dijon"]
+
+          if (cities.includes(lastWord.toLowerCase())) {
+            city = lastWord
+            businessType = words.slice(0, -1).join(" ")
+          } else {
+            businessType = words[0]
+            city = words.slice(1).join(" ")
+          }
+        } else {
+          businessType = searchQuery
+          city = "Paris" // Default city
+        }
       }
 
-      // Call scraping API
+      // Step 1: Geocode the city to get coordinates
+      const geocodeResponse = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city + ", France")}&format=json&limit=1`,
+        {
+          headers: {
+            "User-Agent": "GoToScraping/1.0",
+          },
+        }
+      )
+
+      const geocodeData = await geocodeResponse.json()
+
+      if (!geocodeData || geocodeData.length === 0) {
+        console.error("City not found:", city)
+        setIsSearching(false)
+        return
+      }
+
+      const location = {
+        lat: parseFloat(geocodeData[0].lat),
+        lng: parseFloat(geocodeData[0].lon),
+      }
+
+      // Set map center immediately
+      setMapCenter({
+        lat: location.lat,
+        lon: location.lng,
+      })
+
+      // Step 2: Call Google Places API with coordinates
       const response = await fetch("/api/scrape-places", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          city,
-          businessType,
+          location,
+          radius: 10000, // 10km radius
+          type: businessType === "restaurant" ? "restaurant" : "establishment",
+          keyword: businessType,
           userId: user?.id,
+          includeContactData: true,
         }),
       })
 
       const data = await response.json()
 
-      if (data.results) {
-        setResults(data.results)
+      if (data.businesses && data.businesses.length > 0) {
+        setResults(data.businesses)
         setSearches(searches + 1)
-
-        // Set map center to first result
-        if (data.results.length > 0) {
-          setMapCenter({
-            lat: data.results[0].lat,
-            lon: data.results[0].lon,
-          })
-        }
+      } else {
+        setResults([])
       }
     } catch (error) {
       console.error("Search error:", error)
+      setResults([])
     } finally {
       setIsSearching(false)
     }
