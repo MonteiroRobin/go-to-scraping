@@ -42,6 +42,11 @@ export interface Business {
   estimated_price_range?: string
   specialties?: string[]
   enriched?: boolean
+  opening_hours?: string
+  price_level?: number
+  business_status?: string
+  types?: string[]
+  photos?: string[]
 }
 
 const OVERPASS_ENDPOINTS = [
@@ -81,38 +86,38 @@ export function ScraperInterface() {
     if (results.length === 0) return null
 
     return (
-      <div className="mt-6 space-y-4">
-        <div className="flex items-center justify-between p-6 bg-white dark:bg-card rounded-2xl border border-border shadow-lg transition-all duration-300">
-          <div className="flex items-center gap-6">
-            <div>
-              <div className="text-4xl font-bold text-foreground">
+      <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 sm:p-6 bg-white dark:bg-card rounded-xl sm:rounded-2xl border border-border shadow-lg transition-all duration-300">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 w-full">
+            <div className="flex-shrink-0">
+              <div className="text-2xl sm:text-4xl font-bold text-foreground">
                 {results.length}
               </div>
-              <div className="text-sm text-muted-foreground font-medium">
+              <div className="text-xs sm:text-sm text-muted-foreground font-medium">
                 {results.length === 1 ? "commerce trouvé" : "commerces trouvés"}
               </div>
             </div>
 
             {(newCount > 0 || duplicateCount > 0) && (
-              <div className="flex gap-4">
+              <div className="flex gap-2 sm:gap-4 flex-wrap">
                 {newCount > 0 && (
-                  <div className="px-4 py-2 bg-secondary rounded-lg border border-border">
-                    <div className="text-2xl font-bold text-foreground">{newCount}</div>
-                    <div className="text-xs text-muted-foreground">nouveaux</div>
+                  <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-secondary rounded-lg border border-border">
+                    <div className="text-lg sm:text-2xl font-bold text-foreground">{newCount}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">nouveaux</div>
                   </div>
                 )}
                 {duplicateCount > 0 && (
-                  <div className="px-4 py-2 bg-secondary rounded-lg border border-border">
-                    <div className="text-2xl font-bold text-foreground">{duplicateCount}</div>
-                    <div className="text-xs text-muted-foreground">déjà scrapés</div>
+                  <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-secondary rounded-lg border border-border">
+                    <div className="text-lg sm:text-2xl font-bold text-foreground">{duplicateCount}</div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">déjà scrapés</div>
                   </div>
                 )}
               </div>
             )}
 
             {isEnriching && enrichmentProgress.total > 0 && (
-              <div className="flex-1 min-w-[200px]">
-                <div className="flex items-center justify-between text-xs mb-2">
+              <div className="flex-1 min-w-[150px] sm:min-w-[200px] w-full sm:w-auto">
+                <div className="flex items-center justify-between text-[10px] sm:text-xs mb-2">
                   <span className="text-foreground font-medium">
                     Enrichissement Grok {enrichmentProgress.current}/{enrichmentProgress.total}
                   </span>
@@ -122,14 +127,14 @@ export function ScraperInterface() {
                 </div>
                 <Progress
                   value={(enrichmentProgress.current / enrichmentProgress.total) * 100}
-                  className="h-2.5 bg-secondary"
+                  className="h-2 sm:h-2.5 bg-secondary"
                 />
               </div>
             )}
 
             {isLoading && progress.total > 0 && !isEnriching && (
-              <div className="flex-1 min-w-[200px]">
-                <div className="flex items-center justify-between text-xs mb-2">
+              <div className="flex-1 min-w-[150px] sm:min-w-[200px] w-full sm:w-auto">
+                <div className="flex items-center justify-between text-[10px] sm:text-xs mb-2">
                   <span className="text-foreground font-medium">
                     Scraping {progress.current}/{progress.total}
                   </span>
@@ -139,7 +144,7 @@ export function ScraperInterface() {
                 </div>
                 <Progress
                   value={(progress.current / progress.total) * 100}
-                  className="h-2.5 bg-secondary"
+                  className="h-2 sm:h-2.5 bg-secondary"
                 />
               </div>
             )}
@@ -148,8 +153,8 @@ export function ScraperInterface() {
 
         {duplicateCount > 0 && (
           <Alert className="border-border bg-secondary">
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-            <AlertDescription className="text-foreground">
+            <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+            <AlertDescription className="text-xs sm:text-sm text-foreground">
               {duplicateCount} {duplicateCount === 1 ? "établissement a" : "établissements ont"} déjà été scrapé
               {duplicateCount > 1 ? "s" : ""} précédemment. Les données ont été mises à jour.
             </AlertDescription>
@@ -702,7 +707,21 @@ export function ScraperInterface() {
   const handleExportCSV = useCallback(() => {
     if (results.length === 0) return
 
-    const headers = ["Nom", "Adresse", "Téléphone", "Site Web", "Email", "Note", "Avis", "Latitude", "Longitude"]
+    const headers = [
+      "Nom",
+      "Adresse",
+      "Téléphone",
+      "Site Web",
+      "Email",
+      "Note",
+      "Nombre d'avis",
+      "Niveau de prix",
+      "Catégorie",
+      "Statut",
+      "Horaires",
+      "Latitude",
+      "Longitude"
+    ]
     const csvRows = [
       headers.join(";"),
       ...results.map((business) =>
@@ -714,6 +733,10 @@ export function ScraperInterface() {
           `"${business.email.replace(/"/g, '""')}"`,
           business.rating?.toString().replace(".", ",") || "",
           business.user_ratings_total?.toString() || "",
+          business.price_level?.toString() || "",
+          `"${business.category || business.types?.[0] || ""}"`,
+          `"${business.business_status || ""}"`,
+          `"${business.opening_hours || ""}"`,
           business.lat.toString().replace(".", ","),
           business.lon.toString().replace(".", ","),
         ].join(";"),
@@ -736,7 +759,21 @@ export function ScraperInterface() {
     if (results.length === 0) return
 
     try {
-      const headers = ["Nom", "Adresse", "Téléphone", "Site Web", "Email", "Note", "Avis", "Latitude", "Longitude"]
+      const headers = [
+        "Nom",
+        "Adresse",
+        "Téléphone",
+        "Site Web",
+        "Email",
+        "Note",
+        "Nombre d'avis",
+        "Niveau de prix",
+        "Catégorie",
+        "Statut",
+        "Horaires",
+        "Latitude",
+        "Longitude"
+      ]
       const rows = results.map((business) => [
         business.name,
         business.address,
@@ -745,6 +782,10 @@ export function ScraperInterface() {
         business.email,
         business.rating || "",
         business.user_ratings_total || "",
+        business.price_level || "",
+        business.category || business.types?.[0] || "",
+        business.business_status || "",
+        business.opening_hours || "",
         business.lat,
         business.lon,
       ])
@@ -832,21 +873,21 @@ export function ScraperInterface() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-300">
       <header className="sticky top-0 z-50 border-b border-border backdrop-blur-md bg-white/60 dark:bg-black/60 transition-all duration-300">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-semibold text-foreground">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-4 max-w-[1600px] mx-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <h1 className="text-xl sm:text-2xl font-semibold text-foreground">
                 Go To Scraping
               </h1>
               {user && (
-                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-border transition-colors duration-300">
+                <div className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/10 rounded-full border border-border transition-colors duration-300">
                   <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
-                  <span className="text-sm font-medium text-foreground">{user.name}</span>
+                  <span className="text-xs sm:text-sm font-medium text-foreground truncate max-w-[150px]">{user.name}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
               <ThemeToggle />
               <Button
                 onClick={logout}
@@ -860,37 +901,37 @@ export function ScraperInterface() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <Button
               onClick={() => setViewMode("search")}
               variant={viewMode === "search" ? "default" : "ghost"}
-              className="flex-1 gap-2 transition-all duration-200"
+              className="gap-1.5 sm:gap-2 transition-all duration-200 text-xs sm:text-sm"
             >
-              <Search className="w-4 h-4" />
-              Recherche
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Recherche</span>
             </Button>
             <Button
               onClick={() => setViewMode("map")}
               variant={viewMode === "map" ? "default" : "ghost"}
-              className="flex-1 gap-2 transition-all duration-200"
+              className="gap-1.5 sm:gap-2 transition-all duration-200 text-xs sm:text-sm"
             >
-              <Map className="w-4 h-4" />
-              Carte
+              <Map className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Carte</span>
             </Button>
             <Button
               onClick={() => setViewMode("history")}
               variant={viewMode === "history" ? "default" : "ghost"}
-              className="flex-1 gap-2 transition-all duration-200"
+              className="gap-1.5 sm:gap-2 transition-all duration-200 text-xs sm:text-sm"
             >
-              <History className="w-4 h-4" />
-              Historique
+              <History className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Historique</span>
             </Button>
           </div>
         </div>
       </header>
 
       {viewMode === "history" ? (
-        <div className="container mx-auto px-4 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
           <HistoryView
             onSearch={(city, businessType, keywords) => {
               setViewMode("search")
@@ -901,7 +942,7 @@ export function ScraperInterface() {
       ) : viewMode === "search" ? (
         <>
           <div className="border-b border-border bg-white/80 dark:bg-black/80 backdrop-blur-sm shadow-sm transition-all duration-300">
-            <div className="container mx-auto px-4 py-6">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1600px] mx-auto">
               <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
 
               <div className="mt-6">
@@ -1052,15 +1093,15 @@ export function ScraperInterface() {
             </div>
           )}
 
-          <div className="container mx-auto px-4 py-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
             {results.length === 0 && !isLoading && (
-              <div className="text-center p-12 bg-white dark:bg-card rounded-2xl border border-dashed border-border shadow-sm transition-all duration-300">
+              <div className="text-center p-8 sm:p-12 bg-white dark:bg-card rounded-2xl border border-dashed border-border shadow-sm transition-all duration-300">
                 <div className="max-w-md mx-auto space-y-3">
-                  <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center transition-colors duration-300">
-                    <Search className="w-8 h-8 text-primary" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center transition-colors duration-300">
+                    <Search className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                   </div>
-                  <p className="text-foreground font-medium">Commencez votre recherche</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm sm:text-base text-foreground font-medium">Commencez votre recherche</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Entrez une ville et un type de commerce, puis cliquez sur "Rechercher"
                   </p>
                 </div>
@@ -1068,7 +1109,7 @@ export function ScraperInterface() {
             )}
 
             {results.length > 0 && (
-              <div className="rounded-2xl overflow-hidden border border-border shadow-xl bg-white dark:bg-card transition-all duration-300">
+              <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-border shadow-xl bg-white dark:bg-card transition-all duration-300">
                 <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
               </div>
             )}
@@ -1077,18 +1118,18 @@ export function ScraperInterface() {
       ) : (
         <>
           {/* Map View */}
-          <div className="container mx-auto px-4 py-8">
-            <div className="mb-6 p-6 bg-white dark:bg-card rounded-xl border border-border shadow-lg transition-all duration-300">
-              <h2 className="text-lg font-semibold text-foreground mb-2">Sélection par zone</h2>
-              <p className="text-sm text-muted-foreground">
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1600px] mx-auto">
+            <div className="mb-4 sm:mb-6 p-4 sm:p-6 bg-white dark:bg-card rounded-xl border border-border shadow-lg transition-all duration-300">
+              <h2 className="text-base sm:text-lg font-semibold text-foreground mb-2">Sélection par zone</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Utilisez les outils de dessin pour sélectionner une zone sur la carte, puis cliquez sur "Confirmer" pour
                 scraper les commerces dans cette zone.
               </p>
             </div>
 
             <div
-              className="rounded-2xl overflow-hidden border border-border shadow-2xl transition-all duration-300"
-              style={{ height: "700px" }}
+              className="rounded-xl sm:rounded-2xl overflow-hidden border border-border shadow-2xl transition-all duration-300"
+              style={{ height: "500px", minHeight: "400px" }}
             >
               <MapComponent
                 onZoneConfirm={handleZoneConfirm}
@@ -1099,10 +1140,10 @@ export function ScraperInterface() {
             </div>
 
             {isLoading && (
-              <div className="mt-6 p-6 bg-secondary rounded-xl border border-border">
+              <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-secondary rounded-xl border border-border">
                 <div className="flex items-center gap-3 mb-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                  <span className="text-sm font-medium text-foreground">
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-primary" />
+                  <span className="text-xs sm:text-sm font-medium text-foreground">
                     Scraping avec Google Places API en cours...
                   </span>
                 </div>
@@ -1116,7 +1157,7 @@ export function ScraperInterface() {
             )}
 
             {results.length > 0 && (
-              <div className="mt-6 rounded-2xl overflow-hidden border border-border shadow-xl bg-white dark:bg-card transition-all duration-300">
+              <div className="mt-4 sm:mt-6 rounded-xl sm:rounded-2xl overflow-hidden border border-border shadow-xl bg-white dark:bg-card transition-all duration-300">
                 <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
               </div>
             )}
