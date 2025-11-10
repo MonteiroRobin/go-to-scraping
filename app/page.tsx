@@ -154,11 +154,16 @@ export default function HomePage() {
                     <Search className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-primary flex-shrink-0 transition-transform duration-300 hover:scale-110" strokeWidth={2} />
                   </div>
                 </div>
-                <div className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-normal italic text-foreground text-right px-4 sm:px-0">
-                  <WordRotate
-                    words={["Directement sur la carte", "En temps réel", "Sans limite", "Simplement"]}
-                    className="underline decoration-primary decoration-2 underline-offset-4 sm:underline-offset-8"
-                  />
+                <div className="relative flex justify-end px-4 sm:px-0">
+                  {/* Cercle dégradé en arrière-plan pour contraste */}
+                  <div className="absolute right-4 sm:right-0 top-1/2 -translate-y-1/2 w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] rounded-full bg-gradient-radial from-background/80 via-background/40 to-transparent dark:from-black/60 dark:via-black/30 dark:to-transparent blur-2xl -z-10"></div>
+
+                  <div className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-normal italic text-foreground text-right max-w-[90%] sm:max-w-full">
+                    <WordRotate
+                      words={["Directement sur la carte", "En temps réel", "Sans limite", "Simplement"]}
+                      className="underline decoration-primary decoration-2 underline-offset-4 sm:underline-offset-8"
+                    />
+                  </div>
                 </div>
               </div>
 
