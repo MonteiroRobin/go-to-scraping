@@ -17,6 +17,9 @@ import {
   AlertCircle,
   Sparkles,
   Download,
+  LayoutGrid,
+  List,
+  Filter,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -25,6 +28,9 @@ import { Progress } from "@/components/ui/progress"
 import { saveSearchHistory } from "@/lib/supabase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TipsSidebar } from "@/components/tips-sidebar"
+import { StatsDashboard } from "@/components/stats-dashboard"
+import { ResultsGrid } from "@/components/results-grid"
+import { FiltersPanel, type FilterOptions } from "@/components/filters-panel"
 
 export interface Business {
   id: string
@@ -83,6 +89,58 @@ export function ScraperInterface() {
   const [enrichmentProgress, setEnrichmentProgress] = useState({ current: 0, total: 0 })
   const [showGrokPrompt, setShowGrokPrompt] = useState(false)
   const [canEnrich, setCanEnrich] = useState(false)
+
+  // View mode for results (list or grid)
+  const [resultsViewMode, setResultsViewMode] = useState<"list" | "grid">("grid")
+
+  // Filters
+  const [filters, setFilters] = useState<FilterOptions>({})
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Filtered results based on active filters
+  const filteredResults = useMemo(() => {
+    let filtered = [...results]
+
+    // Filter by rating
+    if (filters.minRating) {
+      filtered = filtered.filter((b) => (b.rating || 0) >= filters.minRating!)
+    }
+
+    // Filter by website presence
+    if (filters.hasWebsite) {
+      filtered = filtered.filter((b) => b.website && b.website !== "Non disponible")
+    }
+
+    // Filter by phone presence
+    if (filters.hasPhone) {
+      filtered = filtered.filter((b) => b.phone && b.phone !== "Non disponible")
+    }
+
+    // Filter by email presence
+    if (filters.hasEmail) {
+      filtered = filtered.filter((b) => b.email && b.email !== "Non disponible")
+    }
+
+    // Filter by price level
+    if (filters.priceLevel && filters.priceLevel.length > 0) {
+      filtered = filtered.filter((b) => b.price_level && filters.priceLevel!.includes(b.price_level))
+    }
+
+    // Sort results
+    if (filters.sortBy) {
+      filtered.sort((a, b) => {
+        let comparison = 0
+        if (filters.sortBy === "name") {
+          comparison = a.name.localeCompare(b.name)
+        } else if (filters.sortBy === "rating") {
+          comparison = (b.rating || 0) - (a.rating || 0)
+        }
+        return filters.sortOrder === "asc" ? comparison : -comparison
+      })
+    }
+
+    return filtered
+  }, [results, filters])
 
   const statsDisplay = useMemo(() => {
     if (results.length === 0) return null
@@ -888,31 +946,88 @@ export function ScraperInterface() {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
-          <Button
-            onClick={() => setViewMode("search")}
-            variant={viewMode === "search" ? "default" : "ghost"}
-            className="w-full justify-start gap-3 h-11"
-          >
-            <Search className="w-4 h-4" />
-            <span>Recherche</span>
-          </Button>
-          <Button
-            onClick={() => setViewMode("map")}
-            variant={viewMode === "map" ? "default" : "ghost"}
-            className="w-full justify-start gap-3 h-11"
-          >
-            <Map className="w-4 h-4" />
-            <span>Carte & Zones</span>
-          </Button>
-          <Button
-            onClick={() => setViewMode("history")}
-            variant={viewMode === "history" ? "default" : "ghost"}
-            className="w-full justify-start gap-3 h-11"
-          >
-            <History className="w-4 h-4" />
-            <span>Historique</span>
-          </Button>
+        <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
+          <div className="space-y-1">
+            <Button
+              onClick={() => setViewMode("search")}
+              variant={viewMode === "search" ? "default" : "ghost"}
+              className="w-full justify-start gap-3 h-11"
+            >
+              <Search className="w-4 h-4" />
+              <span>Recherche</span>
+            </Button>
+            <Button
+              onClick={() => setViewMode("map")}
+              variant={viewMode === "map" ? "default" : "ghost"}
+              className="w-full justify-start gap-3 h-11"
+            >
+              <Map className="w-4 h-4" />
+              <span>Carte & Zones</span>
+            </Button>
+            <Button
+              onClick={() => setViewMode("history")}
+              variant={viewMode === "history" ? "default" : "ghost"}
+              className="w-full justify-start gap-3 h-11"
+            >
+              <History className="w-4 h-4" />
+              <span>Historique</span>
+            </Button>
+          </div>
+
+          {/* Quick Stats */}
+          {results.length > 0 && (
+            <div className="pt-4 border-t border-border">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                Stats rapides
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 rounded-lg bg-card/50">
+                  <span className="text-xs text-muted-foreground">Résultats</span>
+                  <span className="text-sm font-bold text-foreground">{results.length}</span>
+                </div>
+                {results.filter((r) => r.rating).length > 0 && (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-card/50">
+                    <span className="text-xs text-muted-foreground">Note moy.</span>
+                    <span className="text-sm font-bold text-foreground">
+                      {(
+                        results.reduce((sum, r) => sum + (r.rating || 0), 0) /
+                        results.filter((r) => r.rating).length
+                      ).toFixed(1)}
+                      /5
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Popular Searches - Templates */}
+          <div className="pt-4 border-t border-border">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              Recherches populaires
+            </h3>
+            <div className="space-y-1">
+              {[
+                { city: "Paris", type: "restaurant" },
+                { city: "Lyon", type: "coiffeur" },
+                { city: "Marseille", type: "boulangerie" },
+                { city: "Toulouse", type: "garage" },
+              ].map((template, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    setViewMode("search")
+                    // Could trigger search automatically here
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-card/50 transition-colors group"
+                >
+                  <div className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">
+                    {template.type} à {template.city}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </nav>
 
         <div className="p-4 border-t border-border space-y-3">
@@ -994,20 +1109,8 @@ export function ScraperInterface() {
         </div>
       ) : viewMode === "search" ? (
         <>
-          {/* Search Section with Sidebar */}
+          {/* Search Section with Map */}
           <div className="flex-1 flex overflow-hidden relative">
-            {/* Background Map */}
-            {mapCenter && (
-              <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0">
-                <MapComponent
-                  center={mapCenter}
-                  results={results}
-                  onZoneSelect={() => {}}
-                  drawingMode={false}
-                />
-              </div>
-            )}
-
             {/* Main Search Area */}
             <div className="flex-1 overflow-y-auto relative z-10">
               <div className="p-6 lg:p-8 max-w-6xl">
@@ -1184,6 +1287,48 @@ export function ScraperInterface() {
                           <p className="text-sm text-muted-foreground mt-1">{results.length} établissements trouvés</p>
                         </div>
                         <div className="flex gap-2">
+                          {/* Filters Button */}
+                          <Button
+                            onClick={() => setShowFilters(true)}
+                            variant="outline"
+                            size="sm"
+                            className="relative"
+                          >
+                            <Filter className="w-4 h-4 mr-2" />
+                            Filtres
+                            {Object.keys(filters).length > 0 && (
+                              <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                                {Object.keys(filters).length}
+                              </span>
+                            )}
+                          </Button>
+
+                          {/* View Mode Toggle */}
+                          <div className="flex gap-1 p-1 bg-secondary rounded-lg">
+                            <button
+                              onClick={() => setResultsViewMode("grid")}
+                              className={`p-2 rounded transition-colors ${
+                                resultsViewMode === "grid"
+                                  ? "bg-primary text-primary-foreground"
+                                  : "text-muted-foreground hover:text-foreground"
+                              }`}
+                              title="Vue en grille"
+                            >
+                              <LayoutGrid className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setResultsViewMode("list")}
+                              className={`p-2 rounded transition-colors ${
+                                resultsViewMode === "list"
+                                  ? "bg-primary text-primary-foreground"
+                                  : "text-muted-foreground hover:text-foreground"
+                              }`}
+                              title="Vue en liste"
+                            >
+                              <List className="w-4 h-4" />
+                            </button>
+                          </div>
+
                           <Button onClick={handleExportCSV} variant="outline" size="sm">
                             <Download className="w-4 h-4 mr-2" />
                             Export CSV
@@ -1195,14 +1340,70 @@ export function ScraperInterface() {
                         </div>
                       </div>
                     </div>
-                    <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
+
+                    {/* Filtered results info */}
+                    {filteredResults.length !== results.length && (
+                      <div className="px-6 py-3 bg-primary/10 border-b-2 border-primary/20">
+                        <p className="text-sm text-foreground">
+                          <span className="font-semibold">{filteredResults.length}</span> résultat
+                          {filteredResults.length > 1 ? "s" : ""} sur {results.length} (filtré
+                          {filteredResults.length > 1 ? "s" : ""})
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Results Display - Grid or List */}
+                    {resultsViewMode === "grid" ? (
+                      <ResultsGrid results={filteredResults} />
+                    ) : (
+                      <ResultsList
+                        results={filteredResults}
+                        onExportCSV={handleExportCSV}
+                        onExportSheets={handleExportToSheets}
+                      />
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Tips Sidebar */}
-            <TipsSidebar />
+            {/* Right Panel: Map & Tips */}
+            <div className="hidden xl:flex flex-col w-[400px] border-l-2 border-border bg-card/30">
+              {/* Interactive Map */}
+              <div className="flex-1 min-h-[400px] relative">
+                {mapCenter ? (
+                  <div className="absolute inset-0">
+                    <MapComponent
+                      center={mapCenter}
+                      results={results}
+                      onZoneSelect={handleZoneConfirm}
+                      drawingMode={false}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full p-6 text-center">
+                    <div>
+                      <Map className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                      <p className="text-sm text-muted-foreground">
+                        La carte s'affichera après votre recherche
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Stats Dashboard */}
+              {results.length > 0 && (
+                <div className="border-t-2 border-border overflow-y-auto max-h-[300px]">
+                  <StatsDashboard results={results} />
+                </div>
+              )}
+
+              {/* Tips Section */}
+              <div className="border-t-2 border-border">
+                <TipsSidebar />
+              </div>
+            </div>
           </div>
         </>
       ) : (
@@ -1274,6 +1475,11 @@ export function ScraperInterface() {
         </>
       )}
       </main>
+
+      {/* Filters Panel Modal */}
+      {showFilters && (
+        <FiltersPanel filters={filters} onFiltersChange={setFilters} onClose={() => setShowFilters(false)} />
+      )}
     </div>
   )
 }
