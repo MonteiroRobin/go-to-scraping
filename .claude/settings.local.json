@@ -9,7 +9,12 @@
       "Bash(git push:*)",
       "Bash(pnpm install:*)",
       "Bash(rm:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(curl:*)",
+      "Bash(cp:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx shadcn@latest add https://magicui.design/r/text-shimmer)"
     ],
     "deny": [],
     "ask": []

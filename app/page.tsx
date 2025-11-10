@@ -20,6 +20,8 @@ import { ParallaxSection } from "@/components/ParallaxSection"
 import { RevealOnScroll } from "@/components/RevealOnScroll"
 import { MapBackground } from "@/components/MapBackground"
 import { SpreadsheetPreview } from "@/components/SpreadsheetPreview"
+import { ShimmerText as MagicShimmer } from "@/components/ui/shimmer-text"
+import { WordRotate } from "@/components/ui/word-rotate"
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth()
@@ -130,17 +132,22 @@ export default function HomePage() {
 
               <div className="max-w-4xl mx-auto space-y-6">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-3xl blur-xl"></div>
-                  <div className="relative flex items-center gap-4 p-6 md:p-8 bg-white border-2 border-border rounded-3xl shadow-2xl">
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-left flex-1 text-foreground/90">
-                      Pêchez vos leads
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-3xl blur-xl animate-gradient"></div>
+                  <div className="relative flex items-center gap-4 p-6 md:p-8 bg-white/90 backdrop-blur-sm border-2 border-border/50 rounded-3xl shadow-2xl transition-all duration-500 hover:shadow-[0_20px_50px_rgba(22,163,74,0.15)]">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-left flex-1">
+                      <MagicShimmer className="text-foreground/90">
+                        Pêchez vos leads
+                      </MagicShimmer>
                     </h1>
-                    <Search className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground flex-shrink-0" strokeWidth={2} />
+                    <Search className="w-12 h-12 md:w-16 md:h-16 text-primary flex-shrink-0 transition-transform duration-300 hover:scale-110" strokeWidth={2} />
                   </div>
                 </div>
-                <p className="text-2xl md:text-4xl lg:text-5xl font-normal italic underline decoration-primary decoration-2 underline-offset-8 text-foreground text-right">
-                  Directement sur la carte
-                </p>
+                <div className="text-2xl md:text-4xl lg:text-5xl font-normal italic text-foreground text-right">
+                  <WordRotate
+                    words={["Directement sur la carte", "En temps réel", "Sans limite", "Simplement"]}
+                    className="underline decoration-primary decoration-2 underline-offset-8"
+                  />
+                </div>
               </div>
 
               <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto pt-12">
@@ -174,11 +181,13 @@ export default function HomePage() {
         <ParallaxSection speed={0.2} className="py-32 border-t border-border relative z-0">
           <div className="grid md:grid-cols-3 gap-8">
             <RevealOnScroll delay={0}>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-primary/30 transition-all duration-300 hover:-translate-y-2">
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
                   <Search className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Recherche intelligente</h3>
+                <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                  Recherche intelligente
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Tapez "café Paris" et récupérez automatiquement tous les établissements de la ville
                 </p>
@@ -186,11 +195,13 @@ export default function HomePage() {
             </RevealOnScroll>
 
             <RevealOnScroll delay={100}>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-primary/30 transition-all duration-300 hover:-translate-y-2">
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
                   <MapPin className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Sélection par zone</h3>
+                <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                  Sélection par zone
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Dessinez un rectangle sur la carte pour cibler précisément une zone géographique
                 </p>
@@ -198,11 +209,13 @@ export default function HomePage() {
             </RevealOnScroll>
 
             <RevealOnScroll delay={200}>
-              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-primary/30 transition-all duration-300 hover:-translate-y-2">
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-card/70 hover:border-primary/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(22,163,74,0.1)]">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto group-hover:scale-110 group-hover:from-primary/20 group-hover:to-primary/10 transition-all duration-300">
                   <Download className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Export facile</h3>
+                <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                  Export facile
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Exportez vos données en CSV ou copiez-les directement dans Google Sheets
                 </p>
