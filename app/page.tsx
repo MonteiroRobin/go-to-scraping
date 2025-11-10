@@ -75,7 +75,7 @@ export default function HomePage() {
               <MapPin className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
             <span className="text-xl font-semibold text-foreground">
-              <ShimmerText>Go To Scraping</ShimmerText>
+              <MagicShimmer>Go To Scraping</MagicShimmer>
             </span>
           </div>
 
