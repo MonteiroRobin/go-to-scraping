@@ -23,6 +23,7 @@ import { useAuth } from "@/lib/auth-context"
 import { Progress } from "@/components/ui/progress"
 import { saveSearchHistory } from "@/lib/supabase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { TipsSidebar } from "@/components/tips-sidebar"
 
 export interface Business {
   id: string
@@ -992,14 +993,16 @@ export function ScraperInterface() {
         </div>
       ) : viewMode === "search" ? (
         <>
-          {/* Search Header */}
-          <div className="border-b border-border bg-card/50 backdrop-blur-sm">
-            <div className="p-6 lg:p-8 max-w-7xl mx-auto">
-              <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-foreground">Nouvelle recherche</h2>
-                <p className="text-sm text-muted-foreground mt-1">Recherchez des commerces par ville et type d'établissement</p>
-              </div>
-              <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
+          {/* Search Section with Sidebar */}
+          <div className="flex-1 flex overflow-hidden">
+            {/* Main Search Area */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-6 lg:p-8 max-w-6xl">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Nouvelle recherche</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Recherchez des commerces par ville et type d'établissement</p>
+                </div>
+                <SearchBar onSearch={handleSearch} onCitySelect={handleCitySelect} isLoading={isLoading} />
 
               <div className="mt-6">
                 <Button
@@ -1149,10 +1152,7 @@ export function ScraperInterface() {
             </div>
           )}
 
-          {/* Results Section */}
-          <div className="flex-1 p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">
-              {results.length === 0 && !isLoading && (
+                {results.length === 0 && !isLoading && (
                 <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-12 bg-card/30 backdrop-blur-sm rounded-2xl border-2 border-dashed border-border/60">
                   <div className="w-20 h-20 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
                     <Search className="w-10 h-10 text-primary" />
@@ -1187,7 +1187,11 @@ export function ScraperInterface() {
                   <ResultsList results={results} onExportCSV={handleExportCSV} onExportSheets={handleExportToSheets} />
                 </div>
               )}
+              </div>
             </div>
+
+            {/* Tips Sidebar */}
+            <TipsSidebar />
           </div>
         </>
       ) : (
