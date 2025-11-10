@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
-import { AnimatedText } from "@/components/AnimatedText"
 import { FloatingDots } from "@/components/InteractiveGrid"
 import { ScrollProgress } from "@/components/ScrollProgress"
 import { OrganizationJsonLd, SoftwareApplicationJsonLd } from "@/components/BlogJsonLd"
@@ -19,6 +18,8 @@ import { GradientText, ShimmerText } from "@/components/GradientText"
 import { Tilt3D } from "@/components/Tilt3D"
 import { ParallaxSection } from "@/components/ParallaxSection"
 import { RevealOnScroll } from "@/components/RevealOnScroll"
+import { MapBackground } from "@/components/MapBackground"
+import { SpreadsheetPreview } from "@/components/SpreadsheetPreview"
 
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth()
@@ -50,14 +51,15 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden relative">
+      <MapBackground />
       <OrganizationJsonLd />
       <SoftwareApplicationJsonLd />
       <ScrollProgress />
       <FloatingDots />
       <CustomCursor />
 
-      <nav className="border-b border-border backdrop-blur-sm bg-background/80 sticky top-0 z-40">
+      <nav className="border-b border-border backdrop-blur-md bg-white/60 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -89,30 +91,64 @@ export default function HomePage() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-6">
+      <main className="max-w-6xl mx-auto px-6 relative z-10">
         <section className="py-20 text-center relative">
           <RevealOnScroll>
             <div className="max-w-4xl mx-auto space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium animate-pulse">
-                <Sparkles className="w-4 h-4" />
-                <span className="font-semibold">Bêta privée - Accès limité</span>
+              <div className="flex items-center justify-center gap-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium animate-pulse">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="font-semibold">Bêta privée - Accès limité</span>
+                </div>
+
+                {!isSubmitted ? (
+                  <form onSubmit={handleWaitlistSubmit} className="flex gap-2">
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="votre@email.com"
+                      required
+                      className="h-9 text-sm border focus:border-primary bg-white w-48"
+                    />
+                    <MagneticButton
+                      type="submit"
+                      disabled={isLoading}
+                      size="sm"
+                      className="h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold"
+                    >
+                      {isLoading ? "..." : "Démarrer →"}
+                    </MagneticButton>
+                  </form>
+                ) : (
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm">
+                    <Check className="w-4 h-4" />
+                    <span className="font-semibold">Inscrit !</span>
+                  </div>
+                )}
               </div>
 
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.1] text-balance">
-                <span className="block mb-4">
-                  <GradientText animated>Transformez Google Maps</GradientText>
-                </span>
-                <span className="block">
-                  <ShimmerText className="text-foreground">en machine à leads</ShimmerText>
-                </span>
-              </h1>
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-3xl blur-xl"></div>
+                  <div className="relative flex items-center gap-4 p-6 md:p-8 bg-white border-2 border-border rounded-3xl shadow-2xl">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-semibold text-left flex-1 text-foreground/90">
+                      Pêchez vos leads
+                    </h1>
+                    <Search className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground flex-shrink-0" strokeWidth={2} />
+                  </div>
+                </div>
+                <p className="text-2xl md:text-4xl lg:text-5xl font-normal italic underline decoration-primary decoration-2 underline-offset-8 text-foreground text-right">
+                  Directement sur la carte
+                </p>
+              </div>
 
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-                <span className="font-semibold text-foreground">Des milliers de contacts qualifiés</span> en quelques clics.
-                Sélectionnez une zone, scrapez, exportez. Simple. Puissant. Automatique.
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto pt-12">
+                Tracez une zone sur Google Maps, <span className="font-semibold text-foreground">capturez tous les commerces</span> instantanément.
+                Du scraping intelligent qui transforme une carte en base de données.
               </p>
 
-              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground pt-4">
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground pt-6">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-primary" />
                   <span>Sans code</span>
@@ -127,86 +163,58 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {!isSubmitted ? (
-                <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto pt-8">
-                  <div className="flex gap-3">
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="votre@email.com"
-                      required
-                      className="flex-1 h-14 text-lg border-2 focus:border-primary"
-                    />
-                    <MagneticButton
-                      type="submit"
-                      disabled={isLoading}
-                      size="lg"
-                      className="h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-semibold"
-                    >
-                      {isLoading ? "..." : "Démarrer →"}
-                    </MagneticButton>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-4 flex items-center justify-center gap-2">
-                    <TrendingUp className="w-4 h-4" />
-                    <span>Rejoignez +500 utilisateurs en liste d'attente</span>
-                  </p>
-                </form>
-              ) : (
-                <div className="max-w-md mx-auto pt-8 space-y-4">
-                  <div className="flex items-center justify-center gap-3 p-6 rounded-xl bg-primary/10 text-primary border-2 border-primary/20">
-                    <Check className="w-6 h-6" />
-                    <span className="font-semibold text-lg">Vous êtes inscrit !</span>
-                  </div>
-                  <p className="text-muted-foreground">
-                    Nous vous contacterons dès que l'accès sera ouvert au public.
-                  </p>
-                </div>
-              )}
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                <span>Rejoignez +500 utilisateurs en liste d'attente</span>
+              </p>
             </div>
           </RevealOnScroll>
-          </div>
         </section>
 
-        <ParallaxSection speed={0.2} className="py-16 border-t border-border">
+        <ParallaxSection speed={0.2} className="py-32 border-t border-border relative z-0">
           <div className="grid md:grid-cols-3 gap-8">
             <RevealOnScroll delay={0}>
-              <Tilt3D className="space-y-4 text-center p-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-primary/30 transition-all duration-300 hover:-translate-y-2">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
                   <Search className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Recherche intelligente</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Tapez "café Paris" et récupérez automatiquement tous les établissements de la ville
                 </p>
-              </Tilt3D>
+              </div>
             </RevealOnScroll>
 
             <RevealOnScroll delay={100}>
-              <Tilt3D className="space-y-4 text-center p-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-primary/30 transition-all duration-300 hover:-translate-y-2">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
                   <MapPin className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Sélection par zone</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Dessinez un rectangle sur la carte pour cibler précisément une zone géographique
                 </p>
-              </Tilt3D>
+              </div>
             </RevealOnScroll>
 
             <RevealOnScroll delay={200}>
-              <Tilt3D className="space-y-4 text-center p-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto">
+              <div className="group space-y-4 text-center p-8 rounded-2xl border border-border/50 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-primary/30 transition-all duration-300 hover:-translate-y-2">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
                   <Download className="w-7 h-7 text-primary" strokeWidth={2} />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Export facile</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Exportez vos données en CSV ou copiez-les directement dans Google Sheets
                 </p>
-              </Tilt3D>
+              </div>
             </RevealOnScroll>
           </div>
         </ParallaxSection>
+
+        {/* Spreadsheet Preview Section */}
+        <section className="py-20 border-t border-border">
+          <SpreadsheetPreview />
+        </section>
 
         <section className="py-20 text-center border-t border-border">
           <div className="max-w-2xl mx-auto space-y-6">
