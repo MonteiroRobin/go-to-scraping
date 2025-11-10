@@ -80,6 +80,11 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-4">
+            <Link href="/pricing">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                Tarifs
+              </Button>
+            </Link>
             <Link href="/blog">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                 Blog

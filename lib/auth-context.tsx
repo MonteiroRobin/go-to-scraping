@@ -31,10 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
+    // Check if user is logged in on mount (client-side only)
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user")
+      if (storedUser) {
+        setUser(JSON.parse(storedUser))
+      }
     }
     setIsLoading(false)
   }, [])
@@ -47,7 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: INTERNAL_USER.name,
       }
       setUser(userWithoutPassword)
-      localStorage.setItem("user", JSON.stringify(userWithoutPassword))
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(userWithoutPassword))
+      }
       return true
     }
 
@@ -56,7 +60,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem("user")
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user")
+    }
     router.push("/")
   }
 
