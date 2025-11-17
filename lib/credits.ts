@@ -12,8 +12,8 @@
  * - app/api/credits/balance/route.ts ✓
  *
  * ⛔ DO NOT IMPORT THIS FILE IN:
- * - Client components (components/*)
- * - Pages (app/*/page.tsx)
+ * - Client components (components folder)
+ * - Page components (app folder)
  * - Any code that runs in the browser
  *
  * ✅ BETTER ALTERNATIVES:
