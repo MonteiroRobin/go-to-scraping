@@ -1,3 +1,19 @@
+/**
+ * Supabase Browser Client for Client-Side Operations
+ *
+ * ✅ SECURITY: This file correctly uses NEXT_PUBLIC_ env vars (safe for client)
+ * ⚠️ IMPORTANT: Only use this for READ operations and public data
+ *
+ * For sensitive operations (credits, payments, etc.):
+ * - Use API routes (app/api/*) with server-side Supabase client
+ * - Enable Row Level Security (RLS) on all Supabase tables
+ * - Use SUPABASE_SERVICE_ROLE_KEY only in API routes
+ *
+ * Fallback Strategy:
+ * - If Supabase not configured, falls back to localStorage
+ * - Useful for development/testing without full setup
+ */
+
 import { createBrowserClient } from "@supabase/ssr"
 
 let supabaseClient: ReturnType<typeof createBrowserClient> | null = null

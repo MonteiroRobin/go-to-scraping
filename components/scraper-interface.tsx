@@ -330,7 +330,10 @@ export function ScraperInterface() {
           const response = await fetch("/api/enrich-with-grok", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ business }),
+            body: JSON.stringify({
+              business,
+              userId: user?.id || "anonymous" // ✅ Pass userId for credit deduction
+            }),
           })
 
           if (!response.ok) {

@@ -44,6 +44,8 @@ export async function POST(req: NextRequest) {
 
     try {
       // Call the existing scrape-places API
+      // IMPORTANT: We pass skipCreditDeduction to avoid double charging
+      // Credits were already deducted in start-job/route.ts
       const scrapeResponse = await fetch(`${req.nextUrl.origin}/api/scrape-places`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,6 +55,7 @@ export async function POST(req: NextRequest) {
           type: businessType,
           keyword: keywords,
           userId: job.user_id,
+          skipCreditDeduction: true, // ✅ Prevents double charging
         }),
       })
 

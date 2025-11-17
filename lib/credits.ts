@@ -1,5 +1,25 @@
+/**
+ * ⚠️ ⚠️ ⚠️ DEPRECATED - DO NOT USE THIS FILE ⚠️ ⚠️ ⚠️
+ *
+ * This file is LEGACY CODE and has CRITICAL SECURITY ISSUES:
+ * 1. 🔴 Exposes server-side environment variables on the client
+ * 2. 🔴 Duplicates logic from lib/credits-config.ts
+ * 3. 🔴 Incorrect credit calculations (doesn't match Google API costs)
+ * 4. 🔴 No proper error handling
+ *
+ * ✅ MIGRATION PATH:
+ * - Use lib/credits-config.ts for credit configurations
+ * - Use API routes (app/api/credits/*) for credit operations
+ * - Never call Supabase directly from client code
+ *
+ * 📅 TODO: Remove this file after migrating all imports to credits-config.ts
+ * See TODO.md for detailed migration steps
+ */
+
 import { createClient } from "@supabase/supabase-js"
 
+// ⚠️ SECURITY ISSUE: Server env vars should NEVER be used client-side
+// These should be in API routes only
 const SUPABASE_URL = process.env.SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!
 

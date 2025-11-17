@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!
 
 export async function POST(request: NextRequest) {
   try {
-    const { location, radius, type, keyword, userId, includeContactData = false } = await request.json()
+    const { location, radius, type, keyword, userId, includeContactData = false, skipCreditDeduction = false } = await request.json()
 
     if (!PLACE_API_KEY) {
       return NextResponse.json({ error: "PLACE_API_KEY not configured" }, { status: 500 })
@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
       useEnrichment: false,
     })
 
-    // Vérifier et consommer les crédits
-    if (userId) {
+    // Vérifier et consommer les crédits (sauf si déjà déduits par process-job)
+    if (userId && !skipCreditDeduction) {
       const success = await consumeCredits(userId, cost)
       if (!success) {
         return NextResponse.json(
@@ -169,13 +169,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update scrape count for duplicates
+    // ✅ PERFORMANCE FIX: Batch update instead of loop
+    // Update scrape timestamp for duplicates (1 query instead of N)
     if (duplicates.length > 0) {
-      for (const duplicate of duplicates) {
-        await supabase
-          .from("scraped_businesses")
-          .update({ last_scraped_at: new Date().toISOString() })
-          .eq("place_id", duplicate.place_id)
+      const duplicatePlaceIds = duplicates.map((d: any) => d.place_id)
+      const { error: updateError } = await supabase
+        .from("scraped_businesses")
+        .update({ last_scraped_at: new Date().toISOString() })
+        .in("place_id", duplicatePlaceIds)
+
+      if (updateError) {
+        console.error("[v0] Error updating duplicate timestamps:", updateError)
+        // Non-blocking error, continue anyway
       }
     }
 
