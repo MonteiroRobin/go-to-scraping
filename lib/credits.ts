@@ -1,18 +1,27 @@
 /**
- * ⚠️ ⚠️ ⚠️ DEPRECATED - DO NOT USE THIS FILE ⚠️ ⚠️ ⚠️
+ * ⚠️ ⚠️ ⚠️ DEPRECATED FOR CLIENT-SIDE USE ⚠️ ⚠️ ⚠️
  *
- * This file is LEGACY CODE and has CRITICAL SECURITY ISSUES:
- * 1. 🔴 Exposes server-side environment variables on the client
+ * This file has ISSUES and should be REFACTORED:
+ * 1. 🔴 Exposes server-side environment variables (ONLY safe in API routes)
  * 2. 🔴 Duplicates logic from lib/credits-config.ts
  * 3. 🔴 Incorrect credit calculations (doesn't match Google API costs)
  * 4. 🔴 No proper error handling
  *
- * ✅ MIGRATION PATH:
- * - Use lib/credits-config.ts for credit configurations
- * - Use API routes (app/api/credits/*) for credit operations
- * - Never call Supabase directly from client code
+ * ✅ CURRENT USAGE (SERVER-SIDE ONLY - OK):
+ * - app/api/scrape-places/route.ts ✓
+ * - app/api/credits/balance/route.ts ✓
  *
- * 📅 TODO: Remove this file after migrating all imports to credits-config.ts
+ * ⛔ DO NOT IMPORT THIS FILE IN:
+ * - Client components (components/*)
+ * - Pages (app/*/page.tsx)
+ * - Any code that runs in the browser
+ *
+ * ✅ BETTER ALTERNATIVES:
+ * - Use lib/credits-config.ts for constants
+ * - Use Supabase RPC functions (deduct_credits, add_credits)
+ * - Call API routes instead of direct DB access
+ *
+ * 📅 TODO: Migrate to Supabase RPC functions
  * See TODO.md for detailed migration steps
  */
 

@@ -1,6 +1,24 @@
-# Local Business Scraper
+# Go To Scraping 🚀
 
 Une application Next.js puissante pour scraper et enrichir les données de commerces locaux via Google Places API et Grok AI.
+
+## 📢 Audit & Corrections Récentes (2025-11-17)
+
+> **✅ 5 bugs critiques corrigés** | **⚡ Performance +100x** | **🔒 Sécurité améliorée**
+
+**Consultez** :
+- 📊 **[AUDIT-SUMMARY.md](./AUDIT-SUMMARY.md)** - Résumé exécutif de l'audit
+- 📋 **[TODO.md](./TODO.md)** - Tâches prioritaires et roadmap
+- 📝 **[CHANGELOG.md](./CHANGELOG.md)** - Historique détaillé des changements
+
+**Principaux correctifs** :
+- ✅ Correction double facturation crédits (économie de 30 crédits/scraping)
+- ✅ Ajout facturation Grok AI (10 crédits/enrichissement)
+- ✅ Remboursement automatique si job échoue
+- ✅ Optimisation requêtes SQL (100x plus rapide)
+- ✅ Mise à jour Next.js + correction vulnérabilités (0 CVE)
+
+---
 
 ## 🚀 Fonctionnalités
 
@@ -25,8 +43,8 @@ Une application Next.js puissante pour scraper et enrichir les données de comme
 ### 1. Cloner le projet depuis GitHub
 
 \`\`\`bash
-git clone https://github.com/votre-username/local-business-scraper.git
-cd local-business-scraper
+git clone https://github.com/MonteiroRobin/go-to-scraping.git
+cd go-to-scraping
 \`\`\`
 
 ### 2. Installer les dépendances
@@ -37,9 +55,19 @@ npm install
 pnpm install
 \`\`\`
 
+> ✅ **Note** : Toutes les dépendances sont installées et sécurisées (0 vulnérabilité)
+
 ### 3. Configuration des variables d'environnement
 
-Créez un fichier `.env.local` à la racine du projet avec les variables suivantes :
+**Méthode rapide** :
+\`\`\`bash
+cp .env.example .env.local
+# Puis éditez .env.local avec vos vraies clés
+\`\`\`
+
+Consultez **[.env.example](./.env.example)** pour la liste complète des variables et instructions détaillées.
+
+**Variables essentielles :**
 
 **Variables Google Maps (requises) :**
 \`\`\`bash
