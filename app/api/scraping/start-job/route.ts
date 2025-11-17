@@ -193,8 +193,35 @@ export async function POST(req: NextRequest) {
 
     if (jobError) {
       console.error("[start-job] Error creating job:", jobError)
-      // TODO: Refund credits if job creation failed
-      return NextResponse.json({ error: "Failed to create scraping job" }, { status: 500 })
+
+      // ✅ CRITICAL FIX: Refund credits if job creation failed
+      console.log("[start-job] Refunding credits due to job creation failure...")
+      const { data: refundResult, error: refundError } = await supabase.rpc("add_credits", {
+        p_user_id: userId,
+        p_amount: creditsAmount,
+        p_type: "refund_job_failed",
+        p_details: {
+          reason: "Job creation failed",
+          error_message: jobError.message,
+          original_amount: creditsAmount,
+        },
+      })
+
+      if (refundError) {
+        console.error("[start-job] Failed to refund credits:", refundError)
+        // Still return error but mention refund failed
+        return NextResponse.json({
+          error: "Failed to create scraping job and refund credits. Please contact support.",
+          details: jobError.message
+        }, { status: 500 })
+      }
+
+      console.log("[start-job] ✅ Credits refunded successfully:", refundResult)
+      return NextResponse.json({
+        error: "Failed to create scraping job",
+        message: "Vos crédits ont été remboursés automatiquement",
+        refunded: creditsAmount
+      }, { status: 500 })
     }
 
     console.log("[start-job] Job created:", job.id)

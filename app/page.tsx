@@ -98,7 +98,7 @@ export default function HomePage() {
             <ThemeToggle />
             <Link href="/login">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-xs sm:text-sm px-2 sm:px-3">
-                Équipe
+                Connexion
               </Button>
             </Link>
           </div>

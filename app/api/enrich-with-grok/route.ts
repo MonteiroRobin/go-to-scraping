@@ -1,11 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
+import { createClient } from "@supabase/supabase-js"
+import { CREDIT_COSTS } from "@/lib/credits-config"
 
 const XAI_API_KEY = process.env.GROK_XAI_API_KEY
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
 
 export async function POST(request: NextRequest) {
   try {
-    const { business } = await request.json()
+    const { business, userId } = await request.json()
 
     if (!XAI_API_KEY) {
       return NextResponse.json({ error: "GROK_XAI_API_KEY not configured" }, { status: 500 })
@@ -13,6 +17,44 @@ export async function POST(request: NextRequest) {
 
     if (!business) {
       return NextResponse.json({ error: "Business data is required" }, { status: 400 })
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
+    }
+
+    // ✅ CRITICAL FIX: Deduct credits BEFORE enrichment
+    // Cost: 10 credits per business enrichment
+    const cost = CREDIT_COSTS.ENRICHMENT_GROK_PER_BUSINESS
+
+    if (SUPABASE_URL && SUPABASE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+      const { data: deductionResult } = await supabase.rpc("deduct_credits", {
+        p_user_id: userId,
+        p_amount: cost,
+        p_type: "enrichment_grok",
+        p_details: {
+          business_name: business.name,
+          business_id: business.id || business.place_id,
+        },
+        p_ip: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip"),
+        p_user_agent: request.headers.get("user-agent"),
+      })
+
+      if (!deductionResult || !deductionResult.success) {
+        return NextResponse.json(
+          {
+            error: deductionResult?.error || "Crédits insuffisants",
+            error_code: deductionResult?.error_code,
+            required: cost,
+            available: deductionResult?.credits_before,
+          },
+          { status: 402 } // Payment Required
+        )
+      }
+
+      console.log("[enrich-with-grok] Credits deducted:", deductionResult)
     }
 
     const prompt = `Tu es un expert en analyse de commerces locaux. Ton rôle est d'enrichir les données avec des informations VRAIMENT utiles pour les utilisateurs.

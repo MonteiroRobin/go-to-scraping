@@ -1,5 +1,34 @@
+/**
+ * ⚠️ ⚠️ ⚠️ DEPRECATED FOR CLIENT-SIDE USE ⚠️ ⚠️ ⚠️
+ *
+ * This file has ISSUES and should be REFACTORED:
+ * 1. 🔴 Exposes server-side environment variables (ONLY safe in API routes)
+ * 2. 🔴 Duplicates logic from lib/credits-config.ts
+ * 3. 🔴 Incorrect credit calculations (doesn't match Google API costs)
+ * 4. 🔴 No proper error handling
+ *
+ * ✅ CURRENT USAGE (SERVER-SIDE ONLY - OK):
+ * - app/api/scrape-places/route.ts ✓
+ * - app/api/credits/balance/route.ts ✓
+ *
+ * ⛔ DO NOT IMPORT THIS FILE IN:
+ * - Client components (components folder)
+ * - Page components (app folder)
+ * - Any code that runs in the browser
+ *
+ * ✅ BETTER ALTERNATIVES:
+ * - Use lib/credits-config.ts for constants
+ * - Use Supabase RPC functions (deduct_credits, add_credits)
+ * - Call API routes instead of direct DB access
+ *
+ * 📅 TODO: Migrate to Supabase RPC functions
+ * See TODO.md for detailed migration steps
+ */
+
 import { createClient } from "@supabase/supabase-js"
 
+// ⚠️ SECURITY ISSUE: Server env vars should NEVER be used client-side
+// These should be in API routes only
 const SUPABASE_URL = process.env.SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY!
 

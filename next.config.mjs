@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true,
+    // ✅ SECURITY FIX: Enable TypeScript errors to catch bugs at build time
+    // Previously: ignoreBuildErrors: true (DANGEROUS!)
+    ignoreBuildErrors: false,
   },
   images: {
     remotePatterns: [
